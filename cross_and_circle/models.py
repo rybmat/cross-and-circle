@@ -9,6 +9,9 @@ class Player(models.Model):
 	won = models.PositiveIntegerField(default=0)
 	lost = models.PositiveIntegerField(default=0)
 
+	def __str__(self):
+		return self.user.username
+
 
 class GameBoard(models.Model):
 	f_00 = models.CharField(max_length=1, null=True, blank=True)
@@ -29,6 +32,9 @@ class Game(models.Model):
 	player_b = models.ForeignKey(Player, related_name='player_b')
 	winner = models.ForeignKey(Player, null=True, blank=True, default=None)
 	board = models.OneToOneField(GameBoard)
+
+	def __str__(self):
+		return self.player_a + ' vs ' + player_b
 
 
 class GameRequest(models.Model):
