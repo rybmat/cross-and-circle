@@ -26,7 +26,6 @@ class UserSerializer(serializers.ModelSerializer):
 		return user
 
 
-
 class PlayerSerializer(serializers.ModelSerializer):
 	user = UserSerializer()
 	class Meta:
@@ -52,3 +51,13 @@ class PlayerSerializer(serializers.ModelSerializer):
 		instance.save()
 		return instance
 
+
+class GameRequestSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = models.GameRequest
+		extra_kwargs = {'date': {'read_only': True}}
+
+
+class GameSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = models.Game

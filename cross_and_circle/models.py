@@ -40,5 +40,5 @@ class Game(models.Model):
 class GameRequest(models.Model):
 	requesting = models.ForeignKey(Player, related_name='requesting')
 	requested = models.ForeignKey(Player, related_name='requested')
-	date = models.DateTimeField()
+	date = models.DateTimeField(auto_now_add=True)
 
