@@ -16,6 +16,12 @@ class UserSerializer(serializers.ModelSerializer):
 		user.save()
 		return user
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = models.User
+		fields = ('username', 'email', 'password')
+		extra_kwargs = {'password': {'write_only': True, 'required': False}, 'username': {'required': False}}
+
 	def update(self, user, validated_data):
 		user.username = validated_data.get('username', user.username)
 		user.email = validated_data.get('email', user.email)
@@ -41,14 +47,27 @@ class PlayerSerializer(serializers.ModelSerializer):
 		player.save()
 		return player
 
+
+class PlayerUpdateSerializer(serializers.ModelSerializer):
+	user = UserUpdateSerializer()
+	class Meta:
+		model = models.Player
+		fields = ('won', 'lost', 'user')
+		depth = 1
+
 	def update(self, instance, validated_data):
-		if 'user' in validated_data:	
-			user = UserSerializer(instance.user, validated_data['user'])
-			user.is_valid()
-			user = user.save()
+		user_data = validated_data.get('user', {})
+		user = instance.user
+
+		user_ser = UserUpdateSerializer(user, data=user_data)
+		user_ser.is_valid()
+		user_ser.save()
+
 		instance.won = validated_data.get('won', instance.won)
 		instance.lost = validated_data.get('lost', instance.lost)
+
 		instance.save()
+		
 		return instance
 
 

@@ -3,9 +3,6 @@ from rest_framework.urlpatterns import format_suffix_patterns
 import views
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'cac.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
     
     url(r'^players/$', views.Players.as_view()),
     url(r'^players/(?P<player_name>[A-Za-z_]+)/$', views.PlayerDetails.as_view()),

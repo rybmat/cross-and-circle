@@ -1,30 +1,53 @@
-from django.http import Http404
+from django.http import Http404, HttpResponse
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from django.shortcuts import render
-from django.http import HttpResponse
+from models import *
+from serializers import * 
 
-# Create your views here.
 
 class Players(APIView):
 	def get(self, request, format=None):
-		return HttpResponse('players - class_view')
+		players = Player.objects.all()
+		serializer = PlayerSerializer(players, many=True)
+		return Response(serializer.data)
 
 	def post(self, request, format=None):
-		pass
+		serializer = PlayerSerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)	
 
 
 class PlayerDetails(APIView):
+	def get_player(self, plname):
+		try:
+			return Player.objects.get(user__username=plname)
+		except Player.DoesNotExist:
+			raise Http404
+
 	def get(self, request, player_name, format=None):
-		return HttpResponse('player ' + player_name + ' - class_view')
+		player = self.get_player(player_name)
+		serializer = PlayerSerializer(player)
+		return Response(serializer.data)
+
 
 	def put(self, request, player_name, format=None):
-		pass
+		player = self.get_player(player_name)
+		d = request.data
+		d.setdefault('user', {})
 
-	def delete(self, request, player_name, format=None):
-		pass
+		serializer = PlayerUpdateSerializer(player, data=d)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+	# def delete(self, request, player_name, format=None):
+	# 	pass
 
 
 class PlayerStats(APIView):
