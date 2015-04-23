@@ -31,6 +31,30 @@ class GameRequestSerializer(serializers.ModelSerializer):
 		model = models.GameRequest
 		extra_kwargs = {'date': {'read_only': True}}
 
+	def to_representation(self, obj):
+		result = {
+			"id": obj.id,
+			"date": str(obj.date),
+			"requesting": obj.requesting.username,
+			"requested": obj.requested.username,
+		}
+		return result
+
+	def to_internal_value(self, data):
+		if 'requesting' not in data or 'requested' not in data:
+			raise serializers.ValidationError({'details': 'Missing parameters'})
+
+		try:
+			requesting_u = models.User.objects.get(username=data['requesting'])
+		except models.User.DoesNotExist:
+			raise serializers.ValidationError({'requesting': 'User not found'})
+		try:
+			requested_u = models.User.objects.get(username=data['requested'])
+		except models.User.DoesNotExist:
+			raise serializers.ValidationError({'requested': 'User not found'})
+
+		return {'requesting': requesting_u, 'requested': requested_u}
+
 
 class GameSerializer(serializers.ModelSerializer):
 	class Meta:
