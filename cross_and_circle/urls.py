@@ -11,13 +11,12 @@ urlpatterns = patterns('',
 
     url(r'^games/$', views.Games.as_view()),
     url(r'^games/(?P<id>[0-9]+)/$', views.GameDetails.as_view()),
-    url(r'^games/(?P<id>[0-9]+)/board/$', views.GameBoard.as_view()),
+    url(r'^games/(?P<id>[0-9]+)/moves/$', views.GameBoard.as_view()),
 
     url(r'^requests/$', views.Requests.as_view()),
-    url(r'^requests/(?P<player_name>[A-Za-z_]+)/$', views.RequestPerPlayer.as_view()),
     url(r'^requests/(?P<id>[0-9]+)/$', views.RequestDetails.as_view()),
 
-
+    url(r'^moves/', views.Moves.as_view()),
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)
