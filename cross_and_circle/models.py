@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
 
 class Move(models.Model):
 	timestamp = models.DateTimeField(auto_now_add=True)
@@ -22,6 +21,9 @@ class Game(models.Model):
 
 	def __str__(self):
 		return self.player_a + ' vs ' + player_b
+
+	def is_finished(self):
+		return finished is not None
 
 
 class GameRequest(models.Model):

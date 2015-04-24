@@ -35,7 +35,6 @@ class PlayerDetails(APIView):
 	def put(self, request, player_name, format=None):
 		player = get_object_or_404(User, username=player_name)
 		d = request.data
-		d.setdefault('user', {})
 
 		serializer = PlayerSerializer(player, data=d, partial=True)
 		if serializer.is_valid():
@@ -58,18 +57,50 @@ class PlayerGames(APIView):
 
 class Games(APIView):
 	def get(self, request, format=None):
-		return HttpResponse('games - class_view')
+		games = Game.objects.all()
+		serializer = GameSerializer(games, many=True)
+		return Response(serializer.data)
 
-	def post(self, request, format=None):
-		pass
+	def post(self, request, format=None):		# TODO: Remove, only for debuging
+		serializer = GameSerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)	
 
 
 class GameDetails(APIView):
 	def get(self, request, id, format=None):
-		return HttpResponse('game ' + id + ' - class_view')
+		game = get_object_or_404(Game, pk=id)
+		serializer = GameSerializer(game)
+		return Response(serializer.data)
 
 	def put(self, request, id, format=None):
-		pass
+		# TODO: prevent from modifying pl_a and pl_b
+		# TODO: prevent from modifying after finished
+		bck = GameSerializer.Meta.extra_kwargs
+		
+		game = get_object_or_404(Game, pk=id)
+		if game.winner is not None:
+			# TODO: return error code object unmodificable
+			pass
+
+		GameSerializer.Meta.extra_kwargs = {
+			'player_a': {'read_only': True},
+			'player_b': {'read_only': True},
+			'winner': {'required': True},
+			'finished': {'required': True},
+		}
+
+		
+
+		serializer = GameSerializer(game, data=request.data, partial=True)
+		if serializer.is_valid():
+			serializer.save()
+			GameSerializer.Meta.extra_kwargs = bck
+			return Response(serializer.data)
+		GameSerializer.Meta.extra_kwargs = bck
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GameBoard(APIView):

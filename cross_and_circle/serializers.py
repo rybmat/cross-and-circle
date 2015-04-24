@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from datetime import datetime
 import models
 
 class PlayerSerializer(serializers.ModelSerializer):
@@ -41,17 +42,9 @@ class GameRequestSerializer(serializers.ModelSerializer):
 		return result
 
 	def to_internal_value(self, data):
-		if 'requesting' not in data or 'requested' not in data:
-			raise serializers.ValidationError({'details': 'Missing parameters'})
-
-		try:
-			requesting_u = models.User.objects.get(username=data['requesting'])
-		except models.User.DoesNotExist:
-			raise serializers.ValidationError({'requesting': 'User not found'})
-		try:
-			requested_u = models.User.objects.get(username=data['requested'])
-		except models.User.DoesNotExist:
-			raise serializers.ValidationError({'requested': 'User not found'})
+		required_fields(['requesting', 'requested'], data)
+		requesting_u = user_or_validationerror('requesting', data['requesting'])
+		requested_u = models.User.objects.get('requested', data['requested'])
 
 		return {'requesting': requesting_u, 'requested': requested_u}
 
@@ -59,7 +52,55 @@ class GameRequestSerializer(serializers.ModelSerializer):
 class GameSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = models.Game
+		extra_kwargs = {}
+
+	def to_representation(self, obj):
+		result = {
+			'id': obj.id,
+			'started': obj.started,
+			'finished': obj.finished,
+			'player_a': obj.player_a.username,
+			'player_b': obj.player_b.username,
+			'winner': obj.winner.username if obj.winner is not None else None,
+		}
+
+		return result
+
+	def to_internal_value(self, data):
+		
+		if 'player_a' in data:
+			data['player_a'] = user_or_validationerror('player_a', data['player_a']).pk
+		if 'player_b' in data:
+			data['player_b'] = user_or_validationerror('player_b', data['player_b']).pk
+		
+		if 'winner' in data:
+			data['winner'] = user_or_validationerror('winner', data['winner']).pk
+			data['finished'] = datetime.now().isoformat()
+		
+		return super(GameSerializer, self).to_internal_value(data)
+
 
 class MoveSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = models.Move
+
+	# def to_representation(self, obj):
+	# 	pass
+
+	# def to_internal_value(self, data):
+	# 	pass
+
+
+def required_fields(req, data):
+	for r in req:
+		if r not in data:
+			raise serializers.ValidationError({'details': 'Missing parameters'})
+
+
+def user_or_validationerror(fieldname, username):
+	try:
+		u = models.User.objects.get(username=username)
+	except models.User.DoesNotExist:
+		raise serializers.ValidationError({fieldname: 'User not found'})
+
+	return u
