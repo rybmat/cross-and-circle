@@ -23,7 +23,7 @@ class Game(models.Model):
 		return self.player_a + ' vs ' + player_b
 
 	def is_finished(self):
-		return finished is not None
+		return self.finished is not None
 
 
 class GameRequest(models.Model):

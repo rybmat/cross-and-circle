@@ -61,7 +61,8 @@ class Games(APIView):
 		serializer = GameSerializer(games, many=True)
 		return Response(serializer.data)
 
-	def post(self, request, format=None):		# TODO: Remove, only for debuging
+	# TODO: Remove, only for debuging
+	def post(self, request, format=None):
 		serializer = GameSerializer(data=request.data)
 		if serializer.is_valid():
 			serializer.save()
@@ -76,23 +77,13 @@ class GameDetails(APIView):
 		return Response(serializer.data)
 
 	def put(self, request, id, format=None):
-		# TODO: prevent from modifying pl_a and pl_b
-		# TODO: prevent from modifying after finished
-		bck = GameSerializer.Meta.extra_kwargs
-		
 		game = get_object_or_404(Game, pk=id)
-		if game.winner is not None:
-			# TODO: return error code object unmodificable
-			pass
+		if game.is_finished():
+			# 405 Method Not Allowed (?)
+			return Response({"details": "Can not modify finished game"}, status=status.HTTP_403_FORBIDDEN)
 
-		GameSerializer.Meta.extra_kwargs = {
-			'player_a': {'read_only': True},
-			'player_b': {'read_only': True},
-			'winner': {'required': True},
-			'finished': {'required': True},
-		}
-
-		
+		if 'player_a' in request.data or 'player_b' in request.data:
+			return Response({"details": "Can not modify players"}, status=status.HTTP_403_FORBIDDEN)
 
 		serializer = GameSerializer(game, data=request.data, partial=True)
 		if serializer.is_valid():
@@ -106,7 +97,6 @@ class GameDetails(APIView):
 class GameBoard(APIView):
 	def get(self, request, id, format=None):
 		return HttpResponse('game board' + id + ' - class_view')
-
 
 
 class Requests(APIView):
