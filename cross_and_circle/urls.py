@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^requests/(?P<id>[0-9]+)/$', views.RequestDetails.as_view()),
 
     url(r'^moves/', views.Moves.as_view()),
+    url(r'^accepted-requests/', views.Accepted.as_view()),
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

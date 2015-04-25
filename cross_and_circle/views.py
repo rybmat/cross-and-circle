@@ -1,5 +1,6 @@
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -25,7 +26,6 @@ class Players(APIView):
 
 
 class PlayerDetails(APIView):
-
 	def get(self, request, player_name, format=None):
 		player = get_object_or_404(User, username=player_name)
 		serializer = PlayerSerializer(player)
@@ -46,28 +46,44 @@ class PlayerDetails(APIView):
 
 class PlayerStats(APIView):
 	def get(self, request, player_name, format=None):
-		return HttpResponse('player ' + player_name + 'stats - class_view')
+		player = get_object_or_404(User, username=player_name)
+		games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player)).exclude(winner=None)
+		all_games = len(games)
+		won_games = len(games.filter(winner=player))
+		lost_games = all_games - won_games
+
+		return Response({"games": all_games, "won": won_games, "lost": lost_games})
 
 
 class PlayerGames(APIView):
 	def get(self, request, player_name, format=None):
-		return HttpResponse('player ' + player_name + 'games - class_view')
+		player = get_object_or_404(User, username=player_name)
+		games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player))
 
+		serializer = GameSerializer(games, many=True)
+		return Response(serializer.data)
 
 
 class Games(APIView):
 	def get(self, request, format=None):
-		games = Game.objects.all()
+		params = {}
+		params = {}
+		if 'player_a' in request.query_params:
+			params['player_a'] = get_object_or_404(User, username=request.query_params['player_a'])
+		if 'player_b' in request.query_params:
+			params['player_b'] = get_object_or_404(User, username=request.query_params['player_b'])
+
+		games = Game.objects.all().filter(**params)
 		serializer = GameSerializer(games, many=True)
 		return Response(serializer.data)
 
-	# TODO: Remove, only for debuging
-	def post(self, request, format=None):
-		serializer = GameSerializer(data=request.data)
-		if serializer.is_valid():
-			serializer.save()
-			return Response(serializer.data, status=status.HTTP_201_CREATED)
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)	
+	# TODO: Remove, only for testing
+	# def post(self, request, format=None):
+	# 	serializer = GameSerializer(data=request.data)
+	# 	if serializer.is_valid():
+	# 		serializer.save()
+	# 		return Response(serializer.data, status=status.HTTP_201_CREATED)
+	# 	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)	
 
 
 class GameDetails(APIView):
@@ -121,14 +137,13 @@ class Requests(APIView):
 
 class RequestDetails(APIView):
 	def get(self, request, id, format=None):
-		obj = get_object_or_404(GameRequest, pk=id)
-		serializer = GameRequestSerializer(obj)
+		req = get_object_or_404(GameRequest, pk=id)
+		serializer = GameRequestSerializer(req)
 		return Response(serializer.data)
 
 	def delete(self, request, id, format=None):
-		# TODO: create new Game item
-		obj = get_object_or_404(GameRequest, pk=id)
-		obj.delete()
+		req = get_object_or_404(GameRequest, pk=id)
+		req.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
 	def post(self, request, id, format=None):	# without that delete does not work
@@ -141,4 +156,21 @@ class Moves(APIView):
 
 	def post(self, request, format=None):
 		pass
+
+
+class Accepted(APIView):
+	def post(self, request, format=None):	# without that delete does not work
+		if not 'request-id' in request.data:
+			return Response({"details": "request-id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+		req = get_object_or_404(GameRequest, pk=request.data['request-id'])
+		
+		game = Game()
+		game.player_a = req.requesting
+		game.player_b = req.requested
+		game.save()
+		game_ser = GameSerializer(game)
+
+		req.delete()
+		return Response(game_ser.data, status=status.HTTP_201_CREATED)
 
