@@ -55,6 +55,7 @@ class PlayerStats(APIView):
 		return Response({"games": all_games, "won": won_games, "lost": lost_games})
 
 
+
 class PlayerGames(APIView):
 	def get(self, request, player_name, format=None):
 		player = get_object_or_404(User, username=player_name)
@@ -62,6 +63,7 @@ class PlayerGames(APIView):
 
 		serializer = GameSerializer(games, many=True)
 		return Response(serializer.data)
+
 
 
 class Games(APIView):
@@ -84,6 +86,7 @@ class Games(APIView):
 	# 		serializer.save()
 	# 		return Response(serializer.data, status=status.HTTP_201_CREATED)
 	# 	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)	
+
 
 
 class GameDetails(APIView):
@@ -110,6 +113,7 @@ class GameDetails(APIView):
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class Requests(APIView):
 	def get(self, request, format=None):
 		params = {}
@@ -130,6 +134,7 @@ class Requests(APIView):
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class RequestDetails(APIView):
 	def get(self, request, id, format=None):
 		req = get_object_or_404(GameRequest, pk=id)
@@ -145,6 +150,7 @@ class RequestDetails(APIView):
 		return Response({})
 
 
+
 class Moves(APIView):
 	def get(self, request, id, format=None):
 		game = get_object_or_404(Game, pk=id)
@@ -154,15 +160,13 @@ class Moves(APIView):
 
 	def post(self, request, id, format=None):
 		request.data['game'] = id
-		print "req data", request.data
 		serializer = MoveSerializer(data=request.data)
 		if serializer.is_valid():
-			o = serializer.save()
-			print o
-			print serializer.data
+			serializer.save()
 			# TODO: make a logic to check winner here and will finish game
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class Accepted(APIView):

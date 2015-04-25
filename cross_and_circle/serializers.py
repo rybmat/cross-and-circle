@@ -96,17 +96,20 @@ class MoveSerializer(serializers.ModelSerializer):
 	def to_internal_value(self, data):
 		if 'player' in data:
 			data['player'] = user_or_validationerror('player', data['player']).pk
-		
+
 		if 'game' in data:
 			try:
 				game = models.Game.objects.get(pk=data['game'])
 				if game.is_finished():
 					raise serializers.ValidationError({'details': 'game is finished'})
 				
-				players = (game.player_a.username, game.player_b.username,)
+				players = (game.player_a.id, game.player_b.id,)
 				if data['player'] not in players:
 					raise serializers.ValidationError({'player': 'player otside of game'})
-					
+				
+				if data['player'] == game.move_set.order_by('-timestamp').values()[0]['player_id']:
+					raise serializers.ValidationError({'player': 'Second player is taking turn'})
+
 			except models.Game.DoesNotExist:
 				raise serializers.ValidationError({'details': 'game with given id does not exist'})
 
