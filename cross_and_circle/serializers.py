@@ -84,11 +84,36 @@ class MoveSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = models.Move
 
-	# def to_representation(self, obj):
-	# 	pass
+	def to_representation(self, obj):
+		res = {
+			'timestamp': obj.timestamp,
+			'player': obj.player.username,
+			'position': obj.position,
+			'game': obj.game.id
+		}
+		return res
 
-	# def to_internal_value(self, data):
-	# 	pass
+	def to_internal_value(self, data):
+		if 'player' in data:
+			data['player'] = user_or_validationerror('player', data['player']).pk
+		
+		if 'game' in data:
+			try:
+				game = models.Game.objects.get(pk=data['game'])
+				if game.is_finished():
+					raise serializers.ValidationError({'details': 'game is finished'})
+				
+				players = (game.player_a.username, game.player_b.username,)
+				if data['player'] not in players:
+					raise serializers.ValidationError({'player': 'player otside of game'})
+					
+			except models.Game.DoesNotExist:
+				raise serializers.ValidationError({'details': 'game with given id does not exist'})
+
+		if 'position' in data and data['position'] not in range(9):
+			raise serializers.ValidationError({'position': 'position index shoud be in range 0..8'})
+
+		return super(MoveSerializer, self).to_internal_value(data)
 
 
 def required_fields(req, data):

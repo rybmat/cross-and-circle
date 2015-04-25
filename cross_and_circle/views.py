@@ -99,7 +99,7 @@ class GameDetails(APIView):
 			return Response({"details": "Can not modify finished game"}, status=status.HTTP_403_FORBIDDEN)
 
 		if 'player_a' in request.data or 'player_b' in request.data:
-			return Response({"details": "Can not modify players"}, status=status.HTTP_403_FORBIDDEN)
+			return Response({"details": "Can not modify players when game is in progress"}, status=status.HTTP_403_FORBIDDEN)
 
 		serializer = GameSerializer(game, data=request.data, partial=True)
 		if serializer.is_valid():
@@ -108,11 +108,6 @@ class GameDetails(APIView):
 			return Response(serializer.data)
 		GameSerializer.Meta.extra_kwargs = bck
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class GameBoard(APIView):
-	def get(self, request, id, format=None):
-		return HttpResponse('game board' + id + ' - class_view')
 
 
 class Requests(APIView):
@@ -151,15 +146,27 @@ class RequestDetails(APIView):
 
 
 class Moves(APIView):
-	def get(self, request, format=None):
-		return HttpResponse('Moves - class_view number')
+	def get(self, request, id, format=None):
+		game = get_object_or_404(Game, pk=id)
+		moves = Move.objects.all().filter(game=game)
+		serializer = MoveSerializer(moves, many=True)
+		return Response(serializer.data)
 
-	def post(self, request, format=None):
-		pass
+	def post(self, request, id, format=None):
+		request.data['game'] = id
+		print "req data", request.data
+		serializer = MoveSerializer(data=request.data)
+		if serializer.is_valid():
+			o = serializer.save()
+			print o
+			print serializer.data
+			# TODO: make a logic to check winner here and will finish game
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Accepted(APIView):
-	def post(self, request, format=None):	# without that delete does not work
+	def post(self, request, format=None):
 		if not 'request-id' in request.data:
 			return Response({"details": "request-id is required"}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -2,16 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class Move(models.Model):
-	timestamp = models.DateTimeField(auto_now_add=True)
-	player = models.ForeignKey(User, related_name='all_moves')
-	position = models.PositiveSmallIntegerField()
-	game = models.ForeignKey(User)
-
-	def __str__(self):
-		return ' '.join([self.id, self.player, self.game, self.position])
-
-
 class Game(models.Model):
 	started = models.DateTimeField(auto_now_add=True)
 	finished = models.DateTimeField(null=True, blank=True, default=None)
@@ -24,6 +14,18 @@ class Game(models.Model):
 
 	def is_finished(self):
 		return self.finished is not None
+
+class Move(models.Model):
+	timestamp = models.DateTimeField(auto_now_add=True)
+	player = models.ForeignKey(User, related_name='all_moves')
+	position = models.PositiveSmallIntegerField()
+	game = models.ForeignKey(Game)
+
+	class Meta:
+		unique_together = ("game", "position",)
+
+	def __str__(self):
+		return ' '.join([str(self.id), self.player.username, str(self.game.id), str(self.position)])
 
 
 class GameRequest(models.Model):
