@@ -5,9 +5,9 @@ import views
 urlpatterns = patterns('',
     
     url(r'^players/$', views.Players.as_view()),
-    url(r'^players/(?P<player_name>[A-Za-z_]+)/$', views.PlayerDetails.as_view()),
-    url(r'^players/(?P<player_name>[A-Za-z_]+)/stats/$', views.PlayerStats.as_view()),
-    url(r'^players/(?P<player_name>[A-Za-z_]+)/games/$', views.PlayerGames.as_view()),
+    url(r'^players/(?P<player_name>[A-Za-z_0-9]+)/$', views.PlayerDetails.as_view()),
+    url(r'^players/(?P<player_name>[A-Za-z_0-9]+)/stats/$', views.PlayerStats.as_view()),
+    url(r'^players/(?P<player_name>[A-Za-z_0-9]+)/games/$', views.PlayerGames.as_view()),
 
     url(r'^games/$', views.Games.as_view()),
     url(r'^games/(?P<id>[0-9]+)/$', views.GameDetails.as_view()),

@@ -13,7 +13,7 @@ class Game(models.Model):
 		return self.player_a + ' vs ' + player_b
 
 	def is_finished(self):
-		return self.finished is not None
+		return self.winner is not None
 
 class Move(models.Model):
 	timestamp = models.DateTimeField(auto_now_add=True)

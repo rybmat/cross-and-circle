@@ -44,7 +44,7 @@ class GameRequestSerializer(serializers.ModelSerializer):
 	def to_internal_value(self, data):
 		required_fields(['requesting', 'requested'], data)
 		requesting_u = user_or_validationerror('requesting', data['requesting'])
-		requested_u = models.User.objects.get('requested', data['requested'])
+		requested_u = user_or_validationerror('requested', data['requested'])
 
 		return {'requesting': requesting_u, 'requested': requested_u}
 
@@ -97,21 +97,23 @@ class MoveSerializer(serializers.ModelSerializer):
 		if 'player' in data:
 			data['player'] = user_or_validationerror('player', data['player']).pk
 
-		if 'game' in data:
-			try:
-				game = models.Game.objects.get(pk=data['game'])
-				if game.is_finished():
-					raise serializers.ValidationError({'details': 'game is finished'})
-				
-				players = (game.player_a.id, game.player_b.id,)
-				if data['player'] not in players:
-					raise serializers.ValidationError({'player': 'player otside of game'})
-				
-				if data['player'] == game.move_set.order_by('-timestamp').values()[0]['player_id']:
-					raise serializers.ValidationError({'player': 'Second player is taking turn'})
+			if 'game' in data:
+				try:
+					game = models.Game.objects.get(pk=data['game'])
+					if game.is_finished():
+						raise serializers.ValidationError({'details': 'game is finished'})
+					
+					players = (game.player_a.id, game.player_b.id,)
+					if data['player'] not in players:
+						raise serializers.ValidationError({'player': 'player otside of game'})
+					
+					moves = game.move_set.order_by('-timestamp').values()
 
-			except models.Game.DoesNotExist:
-				raise serializers.ValidationError({'details': 'game with given id does not exist'})
+					if (len(moves) == 0 and data['player'] == game.player_a) or (len(moves) > 0 and data['player'] == moves[0]['player_id']):
+						raise serializers.ValidationError({'player': 'Second player is taking turn'})
+
+				except models.Game.DoesNotExist:
+					raise serializers.ValidationError({'details': 'game with given id does not exist'})
 
 		if 'position' in data and data['position'] not in range(9):
 			raise serializers.ValidationError({'position': 'position index shoud be in range 0..8'})

@@ -1,0 +1,244 @@
+GET /rest/players/ 
+returns:
+	[
+		{
+			"username": string,
+			"email":	string,
+		},
+		{
+			"username": string,
+			"email":	string,
+		}
+		.
+		.		
+	]
+
+
+POST /rest/players/ 
+takes:
+{
+	"username": string,	 	// required
+	"email":	string,
+	"password": string,		// required
+}
+returns 201:
+{
+	"username": string,
+	"email":	string,
+},
+or 400 with errors if request is invalid:
+
+
+GET /rest/players/{playername}
+returns 200:
+{
+	"username": string,
+	"email":	string,
+},
+or 404 if playername not found:
+{
+    "detail": "Not found."
+}
+
+
+PUT /rest/players/{playername}
+takes:
+{
+	"username": string,
+	"email":	string,
+	"password": string,
+}	
+returns 200:
+{
+	"username": string,
+	"email":	string,
+},
+or 404 if playername not found:
+{
+    "detail": "Not found."
+}
+or 400 if data is not valid
+
+
+GET /rest/players/{player_name}/games/
+returns 200:
+[
+    {
+        "player_b": string,
+        "player_a": string,
+        "started": date,
+        "winner": string or null,
+        "finished": date or null,
+        "id": integer
+    },
+    .
+    .
+]
+or 404 if playername or opponent not found:
+{
+    "detail": "Not found."
+}
+
+
+GET /rest/games/
+returns 200:
+[
+    {
+        "player_b": string,
+        "player_a": string,
+        "started": date,
+        "winner": string or null,
+        "finished": date or null,
+        "id": integer
+    },
+    .
+    .
+]
+
+
+// POST /rest/games/
+// takes:
+// 	{
+//         "player_b": string,	// required
+//         "player_a": string,	// required
+//		   "winner": string, 	
+//     }
+// returns 201:
+//     {
+//         "player_b": string,
+//         "player_a": string,
+//         "started": date,
+//         "winner": string or null,
+//         "finished": date or null,
+//         "id": integer
+//     },
+// or 400 when data is invalid
+
+
+GET /rest/games/{game_id}/
+returns 200:
+{
+        "player_b": string,
+        "player_a": string,
+        "started": date,
+        "winner": string or null,
+        "finished": date or null,
+        "id": integer
+},
+or 404 when game_id does not exist
+
+
+// PUT /rest/games/{game_id}/
+// takes:
+// 	{
+// 		"winner": string,
+// 	}
+// returns 200:
+// {
+//         "player_b": string,
+//         "player_a": string,
+//         "started": date,
+//         "winner": string,
+//         "finished": date,
+//         "id": integer
+// },
+// or 400 when data is not valid
+// or 403 when trying to modify finished game or players for game in progress
+
+
+GET /rest/games/{game_id}/moves/
+returns 200:
+[
+    {
+        "timestamp": "2015-04-26T11:58:14.940Z",
+        "game": 9,
+        "position": 0,
+        "player": "ryba"
+    },
+    .
+    .
+]
+
+
+POST /rest/games/{game_id}/moves/
+takes:
+{
+	"player": string,
+	"position": integer,
+}
+returns 201:
+{
+    "winner": string or null,
+    "move": {
+        "timestamp": date,
+        "game": integer,
+        "position": integer,
+        "player": string
+    }
+}
+or 400 when turn of other player, player out of game, player does not exist, game finished
+
+
+GET /rest/requests/
+returns 200:
+[
+	{
+	    "date": date,
+	    "requested": string,
+	    "id": integer,
+	    "requesting": string
+	}
+	.
+	.
+]
+
+POST /rest/requests/
+takes:
+{
+	"requesting": string,
+	"requested": string,
+}
+returns 201:
+{
+    "date": date,
+    "requested": string,
+    "id": integer,
+    "requesting": string
+}
+or 400 if requested or requesting username does not exists
+
+
+GET /rest/requests/{id}
+returns 200:
+{
+    "date": date,
+    "requested": string,
+    "id": integer,
+    "requesting": string
+}
+or 404 when there is no request with given id
+
+
+DELETE /rest/requests/{id}
+returns 204
+
+
+POST /rest/accepted-requests/
+takes:
+{
+	"request-id": integer,
+}
+returns 201:
+{
+    "player_b": string,
+    "player_a": string,
+    "started": date,
+    "winner": null,
+    "finished": null,
+    "id": 12	// game id
+}
+
+
+
+
+

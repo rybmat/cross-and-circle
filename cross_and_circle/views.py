@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from datetime import datetime
+
 from models import *
 from serializers import * 
 
@@ -44,25 +46,35 @@ class PlayerDetails(APIView):
 
 
 
+class PlayerGames(APIView):
+	def get(self, request, player_name, format=None):
+		player = get_object_or_404(User, username=player_name)
+		if 'opponent' in request.query_params:
+			opponent = get_object_or_404(User, username=request.query_params['opponent'])
+			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player), Q(player_a=opponent) | Q(player_b=opponent))
+		else:
+			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player))
+
+		serializer = GameSerializer(games, many=True)
+		return Response(serializer.data)
+
+
+
 class PlayerStats(APIView):
 	def get(self, request, player_name, format=None):
 		player = get_object_or_404(User, username=player_name)
-		games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player)).exclude(winner=None)
+		
+		if 'opponent' in request.query_params:
+			opponent = get_object_or_404(User, username=request.query_params['opponent'])
+			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player), Q(player_a=opponent) | Q(player_b=opponent)).exclude(winner=None)
+		else:
+			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player)).exclude(winner=None)
+
 		all_games = len(games)
 		won_games = len(games.filter(winner=player))
 		lost_games = all_games - won_games
 
 		return Response({"games": all_games, "won": won_games, "lost": lost_games})
-
-
-
-class PlayerGames(APIView):
-	def get(self, request, player_name, format=None):
-		player = get_object_or_404(User, username=player_name)
-		games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player))
-
-		serializer = GameSerializer(games, many=True)
-		return Response(serializer.data)
 
 
 
@@ -79,13 +91,13 @@ class Games(APIView):
 		serializer = GameSerializer(games, many=True)
 		return Response(serializer.data)
 
-	# TODO: Remove, only for testing
-	# def post(self, request, format=None):
-	# 	serializer = GameSerializer(data=request.data)
-	# 	if serializer.is_valid():
-	# 		serializer.save()
-	# 		return Response(serializer.data, status=status.HTTP_201_CREATED)
-	# 	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)	
+	#TODO: Remove, only for testing
+	def post(self, request, format=None):
+		serializer = GameSerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)	
 
 
 
@@ -95,6 +107,7 @@ class GameDetails(APIView):
 		serializer = GameSerializer(game)
 		return Response(serializer.data)
 
+	# ?? probably unnecessary
 	def put(self, request, id, format=None):
 		game = get_object_or_404(Game, pk=id)
 		if game.is_finished():
@@ -107,9 +120,7 @@ class GameDetails(APIView):
 		serializer = GameSerializer(game, data=request.data, partial=True)
 		if serializer.is_valid():
 			serializer.save()
-			GameSerializer.Meta.extra_kwargs = bck
 			return Response(serializer.data)
-		GameSerializer.Meta.extra_kwargs = bck
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -163,8 +174,14 @@ class Moves(APIView):
 		serializer = MoveSerializer(data=request.data)
 		if serializer.is_valid():
 			serializer.save()
-			# TODO: make a logic to check winner here and will finish game
-			return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+			winner = check_winner(id)
+			if winner:
+				game = get_object_or_404(Game, pk=id)
+				game.winner = User.objects.get(username=winner)
+				game.finished = datetime.now()
+				game.save()
+			return Response({"move": serializer.data, "winner": winner}, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -184,4 +201,26 @@ class Accepted(APIView):
 
 		req.delete()
 		return Response(game_ser.data, status=status.HTTP_201_CREATED)
+
+
+"""0 1 2
+   3 4 5
+   6 7 8
+"""
+win_sequences = (
+	(0,1,2,), (3,4,5,), (6,7,8,),
+	(0,3,6,), (1,4,7,), (2,5,8,),
+	(0,4,8,), (2,4,6,),
+)
+def check_winner(game_id):
+	moves = Move.objects.all().filter(game_id=game_id)
+	board = [None for i in range(9)]
+	for m in moves:
+		board[m.position] = m.player.username
+
+	for s in win_sequences:
+		if board[s[0]] is not None and board[s[0]] == board[s[1]] and board[s[0]] == board[s[2]]:
+			return board[s[0]]
+	return None
+
 
