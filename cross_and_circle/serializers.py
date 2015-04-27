@@ -2,11 +2,14 @@ from rest_framework import serializers
 from datetime import datetime
 import models
 
-class PlayerSerializer(serializers.ModelSerializer):
+class PlayerSerializer(serializers.HyperlinkedModelSerializer):
+	games = serializers.HyperlinkedIdentityField(view_name='user-games', lookup_field='username')
+	stats = serializers.HyperlinkedIdentityField(view_name='user-stats', lookup_field='username')
 	class Meta:
 		model = models.User
-		fields = ('username', 'email', 'password')
-		extra_kwargs = {'password': {'write_only': True}}
+		fields = ('url', 'username', 'email', 'password', 'games', 'stats')
+		extra_kwargs = {'password': {'write_only': True}, 'games': {'read_only': True}, 'stats': {'read_only': True}}
+		lookup_field = 'username'
 
 	def create(self, validated_data):
 		user = models.User(
@@ -27,57 +30,24 @@ class PlayerSerializer(serializers.ModelSerializer):
 		return user
 
 
-class GameRequestSerializer(serializers.ModelSerializer):
+class GameRequestSerializer(serializers.HyperlinkedModelSerializer):
+	requesting = serializers.SlugRelatedField(queryset=models.User.objects.all(), slug_field='username')
+	requested = serializers.SlugRelatedField(queryset=models.User.objects.all(), slug_field='username')
 	class Meta:
 		model = models.GameRequest
 		extra_kwargs = {'date': {'read_only': True}}
-
-	def to_representation(self, obj):
-		result = {
-			"id": obj.id,
-			"date": str(obj.date),
-			"requesting": obj.requesting.username,
-			"requested": obj.requested.username,
-		}
-		return result
-
-	def to_internal_value(self, data):
-		required_fields(['requesting', 'requested'], data)
-		requesting_u = user_or_validationerror('requesting', data['requesting'])
-		requested_u = user_or_validationerror('requested', data['requested'])
-
-		return {'requesting': requesting_u, 'requested': requested_u}
+		fields = ('id', 'url', 'requesting', 'requested', 'date')
 
 
-class GameSerializer(serializers.ModelSerializer):
+class GameSerializer(serializers.HyperlinkedModelSerializer):
+	player_a = serializers.SlugRelatedField(queryset=models.User.objects.all(), slug_field='username')
+	player_b = serializers.SlugRelatedField(queryset=models.User.objects.all(), slug_field='username')
+	winner = serializers.SlugRelatedField(queryset=models.User.objects.all(), slug_field='username')
+
 	class Meta:
 		model = models.Game
-		extra_kwargs = {}
+		fields = ('id', 'url', 'started', 'player_a', 'player_b', 'winner', 'finished')
 
-	def to_representation(self, obj):
-		result = {
-			'id': obj.id,
-			'started': obj.started,
-			'finished': obj.finished,
-			'player_a': obj.player_a.username,
-			'player_b': obj.player_b.username,
-			'winner': obj.winner.username if obj.winner is not None else None,
-		}
-
-		return result
-
-	def to_internal_value(self, data):
-		
-		if 'player_a' in data:
-			data['player_a'] = user_or_validationerror('player_a', data['player_a']).pk
-		if 'player_b' in data:
-			data['player_b'] = user_or_validationerror('player_b', data['player_b']).pk
-		
-		if 'winner' in data:
-			data['winner'] = user_or_validationerror('winner', data['winner']).pk
-			data['finished'] = datetime.now().isoformat()
-		
-		return super(GameSerializer, self).to_internal_value(data)
 
 
 class MoveSerializer(serializers.ModelSerializer):
