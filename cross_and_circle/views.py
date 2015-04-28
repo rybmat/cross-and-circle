@@ -25,17 +25,21 @@ class PlayerDetails(RetrieveUpdateAPIView):
 	lookup_field = 'username'
 
 
-class PlayerGames(APIView):
-	def get(self, request, username, format=None):
+
+class PlayerGames(ListAPIView):
+	serializer_class = GameSerializer
+	lookup_url_kwarg = 'username'
+
+	def get_queryset(self):
+		username = self.kwargs.get(self.lookup_url_kwarg)
 		player = get_object_or_404(User, username=username)
-		if 'opponent' in request.query_params:
-			opponent = get_object_or_404(User, username=request.query_params['opponent'])
+
+		if 'opponent' in self.request.query_params:
+			opponent = get_object_or_404(User, username=self.request.query_params['opponent'])
 			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player), Q(player_a=opponent) | Q(player_b=opponent))
 		else:
 			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player))
-
-		serializer = GameSerializer(games, many=True, context={'request':self.request})
-		return Response(serializer.data)
+		return games
 
 
 
