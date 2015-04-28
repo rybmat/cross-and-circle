@@ -4,11 +4,17 @@ returns:
 		{
 			"username": string,
 			"email":	string,
+            "url":      string, // url to player
+            "games":    string, // url to games played by player
+            "stats":    string, // url to stats of player
 		},
 		{
-			"username": string,
-			"email":	string,
-		}
+            "username": string,
+            "email":    string,
+            "url":      string, // url to player
+            "games":    string, // url to games played by player
+            "stats":    string, // url to stats of player
+        },
 		.
 		.		
 	]
@@ -32,8 +38,11 @@ or 400 with errors if request is invalid:
 GET /rest/players/{playername}
 returns 200:
 {
-	"username": string,
-	"email":	string,
+    "username": string,
+    "email":    string,
+    "url":      string, // url to player
+    "games":    string, // url to games played by player
+    "stats":    string, // url to stats of player
 },
 or 404 if playername not found:
 {
@@ -44,14 +53,39 @@ or 404 if playername not found:
 PUT /rest/players/{playername}
 takes:
 {
-	"username": string,
-	"email":	string,
-	"password": string,
+	"username": string,     // required
+    "email":    string,
+    "password": string,     // required
 }	
 returns 200:
 {
-	"username": string,
-	"email":	string,
+    "username": string,
+    "email":    string,
+    "url":      string, // url to player
+    "games":    string, // url to games played by player
+    "stats":    string, // url to stats of player
+},
+or 404 if playername not found:
+{
+    "detail": "Not found."
+}
+or 400 if data is not valid
+
+
+PATCH /rest/players/{playername}
+takes:
+{
+    "username": string,
+    "email":    string,
+    "password": string,
+}   
+returns 200:
+{
+    "username": string,
+    "email":    string,
+    "url":      string, // url to player
+    "games":    string, // url to games played by player
+    "stats":    string, // url to stats of player
 },
 or 404 if playername not found:
 {
@@ -69,11 +103,25 @@ returns 200:
         "started": date,
         "winner": string or null,
         "finished": date or null,
-        "id": integer
+        "id": integer,
+        "url": string
     },
     .
     .
 ]
+or 404 if playername or opponent not found:
+{
+    "detail": "Not found."
+}
+
+
+GET /rest/players/{player_name}/stats/
+returns 200:
+    {
+        "games": integer,
+        "won": integer,
+        "lost": integer
+    }
 or 404 if playername or opponent not found:
 {
     "detail": "Not found."
@@ -89,30 +137,12 @@ returns 200:
         "started": date,
         "winner": string or null,
         "finished": date or null,
-        "id": integer
+        "id": integer,
+        "url": string
     },
     .
     .
 ]
-
-
-// POST /rest/games/
-// takes:
-// 	{
-//         "player_b": string,	// required
-//         "player_a": string,	// required
-//		   "winner": string, 	
-//     }
-// returns 201:
-//     {
-//         "player_b": string,
-//         "player_a": string,
-//         "started": date,
-//         "winner": string or null,
-//         "finished": date or null,
-//         "id": integer
-//     },
-// or 400 when data is invalid
 
 
 GET /rest/games/{game_id}/
@@ -123,27 +153,10 @@ returns 200:
         "started": date,
         "winner": string or null,
         "finished": date or null,
-        "id": integer
+        "id": integer,
+        "url": string
 },
 or 404 when game_id does not exist
-
-
-// PUT /rest/games/{game_id}/
-// takes:
-// 	{
-// 		"winner": string,
-// 	}
-// returns 200:
-// {
-//         "player_b": string,
-//         "player_a": string,
-//         "started": date,
-//         "winner": string,
-//         "finished": date,
-//         "id": integer
-// },
-// or 400 when data is not valid
-// or 403 when trying to modify finished game or players for game in progress
 
 
 GET /rest/games/{game_id}/moves/
@@ -186,7 +199,8 @@ returns 200:
 	    "date": date,
 	    "requested": string,
 	    "id": integer,
-	    "requesting": string
+	    "requesting": string,
+        "url": string
 	}
 	.
 	.
@@ -203,7 +217,8 @@ returns 201:
     "date": date,
     "requested": string,
     "id": integer,
-    "requesting": string
+    "requesting": string,
+    "url": stirng
 }
 or 400 if requested or requesting username does not exists
 
@@ -214,7 +229,8 @@ returns 200:
     "date": date,
     "requested": string,
     "id": integer,
-    "requesting": string
+    "requesting": string,
+    "url": string
 }
 or 404 when there is no request with given id
 
@@ -236,6 +252,7 @@ returns 201:
     "winner": null,
     "finished": null,
     "id": 12	// game id
+    "url": string
 }
 
 

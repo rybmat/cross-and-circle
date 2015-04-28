@@ -21,7 +21,7 @@ class Players(ListCreateAPIView):
 
 class PlayerDetails(RetrieveUpdateAPIView):
 	queryset = User.objects.all()
-	serializer_class = PlayerSerializer # TODO: make password non required while update
+	serializer_class = PlayerSerializer
 	lookup_field = 'username'
 
 
@@ -97,21 +97,21 @@ class RequestDetails(RetrieveDestroyAPIView):
 
 
 class Moves(APIView):
-	def get(self, request, id, format=None):
-		game = get_object_or_404(Game, pk=id)
+	def get(self, request, pk, format=None):
+		game = get_object_or_404(Game, pk=pk)
 		moves = Move.objects.all().filter(game=game)
 		serializer = MoveSerializer(moves, many=True)
 		return Response(serializer.data)
 
-	def post(self, request, id, format=None):
-		request.data['game'] = id
+	def post(self, request, pk, format=None):
+		request.data['game'] = pk
 		serializer = MoveSerializer(data=request.data)
 		if serializer.is_valid():
 			serializer.save()
 
-			winner = check_winner(id)
+			winner = check_winner(pk)
 			if winner:
-				game = get_object_or_404(Game, pk=id)
+				game = get_object_or_404(Game, pk=pk)
 				game.winner = User.objects.get(username=winner)
 				game.finished = datetime.now()
 				game.save()
@@ -123,7 +123,7 @@ class Moves(APIView):
 class Accepted(APIView):
 	def post(self, request, format=None):
 		if not 'request-id' in request.data:
-			return Response({"details": "request-id is required"}, status=status.HTTP_400_BAD_REQUEST)
+			return Response({"detail": "request-id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
 		req = get_object_or_404(GameRequest, pk=request.data['request-id'])
 		
@@ -131,7 +131,7 @@ class Accepted(APIView):
 		game.player_a = req.requesting
 		game.player_b = req.requested
 		game.save()
-		game_ser = GameSerializer(game)
+		game_ser = GameSerializer(game, context={"request": request})
 
 		req.delete()
 		return Response(game_ser.data, status=status.HTTP_201_CREATED)

@@ -15,6 +15,7 @@ class Game(models.Model):
 	def is_finished(self):
 		return self.winner is not None
 
+
 class Move(models.Model):
 	timestamp = models.DateTimeField(auto_now_add=True)
 	player = models.ForeignKey(User, related_name='all_moves')

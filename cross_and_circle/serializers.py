@@ -43,11 +43,11 @@ class GameSerializer(serializers.HyperlinkedModelSerializer):
 	player_a = serializers.SlugRelatedField(queryset=models.User.objects.all(), slug_field='username')
 	player_b = serializers.SlugRelatedField(queryset=models.User.objects.all(), slug_field='username')
 	winner = serializers.SlugRelatedField(queryset=models.User.objects.all(), slug_field='username')
+	moves = serializers.HyperlinkedIdentityField(view_name='game-moves', read_only=True)
 
 	class Meta:
 		model = models.Game
-		fields = ('id', 'url', 'started', 'player_a', 'player_b', 'winner', 'finished')
-
+		fields = ('id', 'url', 'started', 'player_a', 'player_b', 'winner', 'finished', 'moves')
 
 
 class MoveSerializer(serializers.ModelSerializer):
@@ -71,7 +71,7 @@ class MoveSerializer(serializers.ModelSerializer):
 				try:
 					game = models.Game.objects.get(pk=data['game'])
 					if game.is_finished():
-						raise serializers.ValidationError({'details': 'game is finished'})
+						raise serializers.ValidationError({'detail': 'game is finished'})
 					
 					players = (game.player_a.id, game.player_b.id,)
 					if data['player'] not in players:
@@ -91,10 +91,10 @@ class MoveSerializer(serializers.ModelSerializer):
 		return super(MoveSerializer, self).to_internal_value(data)
 
 
-def required_fields(req, data):
-	for r in req:
-		if r not in data:
-			raise serializers.ValidationError({'details': 'Missing parameters'})
+# def required_fields(req, data):
+# 	for r in req:
+# 		if r not in data:
+# 			raise serializers.ValidationError({'detail': 'Missing parameters'})
 
 
 def user_or_validationerror(fieldname, username):
@@ -102,5 +102,4 @@ def user_or_validationerror(fieldname, username):
 		u = models.User.objects.get(username=username)
 	except models.User.DoesNotExist:
 		raise serializers.ValidationError({fieldname: 'User not found'})
-
 	return u
