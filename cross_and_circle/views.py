@@ -6,26 +6,29 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, ListCreateAPIView, RetrieveUpdateAPIView, RetrieveDestroyAPIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import permissions
 
 from datetime import datetime
 
 from models import *
 from serializers import * 
+from permissions import *
 
-
+# all
 class Players(ListCreateAPIView):
 	queryset = User.objects.all()
 	serializer_class = PlayerSerializer
 	lookup_field = 'username'
 
-
+# read for all, modify for owner
 class PlayerDetails(RetrieveUpdateAPIView):
+	permission_classes = (permissions.IsAuthenticatedOrReadOnly, CanModifyUserDetails)
 	queryset = User.objects.all()
 	serializer_class = PlayerSerializer
 	lookup_field = 'username'
 
 
-
+#all
 class PlayerGames(ListAPIView):
 	serializer_class = GameSerializer
 	lookup_url_kwarg = 'username'
@@ -42,7 +45,7 @@ class PlayerGames(ListAPIView):
 		return games
 
 
-
+# all
 class PlayerStats(APIView):
 	def get(self, request, username, format=None):
 		player = get_object_or_404(User, username=username)
@@ -60,7 +63,7 @@ class PlayerStats(APIView):
 		return Response({"games": all_games, "won": won_games, "lost": lost_games})
 
 
-
+# all
 class Games(ListAPIView):
 	serializer_class = GameSerializer
 
@@ -74,13 +77,13 @@ class Games(ListAPIView):
 	 	return Game.objects.all().filter(**params)
 
 
-
+# all
 class GameDetails(RetrieveAPIView):
 	queryset = Game.objects.all()
 	serializer_class = GameSerializer
 
 
-
+# authenticated
 class Requests(ListCreateAPIView):
 	serializer_class = GameRequestSerializer
 
@@ -93,13 +96,13 @@ class Requests(ListCreateAPIView):
 		return GameRequest.objects.all().filter(**params)
 
 
-
+# read for authenticated, delete for requesting or requested
 class RequestDetails(RetrieveDestroyAPIView):
 	queryset = GameRequest.objects.all()
 	serializer_class = GameRequestSerializer
 
 
-
+# read for all, create for players of game
 class Moves(APIView):
 	def get(self, request, pk, format=None):
 		game = get_object_or_404(Game, pk=pk)
@@ -123,7 +126,7 @@ class Moves(APIView):
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
+# requested only
 class Accepted(APIView):
 	def post(self, request, format=None):
 		if not 'request-id' in request.data:
