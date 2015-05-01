@@ -176,7 +176,6 @@ returns 200:
 POST /rest/games/{game_id}/moves/
 takes:
 {
-	"player": string,
 	"position": integer,
 }
 returns 201:
@@ -209,7 +208,6 @@ returns 200:
 POST /rest/requests/
 takes:
 {
-	"requesting": string,
 	"requested": string,
 }
 returns 201:

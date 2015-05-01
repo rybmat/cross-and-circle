@@ -2,6 +2,10 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
+from models import *
+from serializers import * 
+from permissions import *
+
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, ListCreateAPIView, RetrieveUpdateAPIView, RetrieveDestroyAPIView
 from rest_framework.response import Response
@@ -10,19 +14,18 @@ from rest_framework import permissions
 
 from datetime import datetime
 
-from models import *
-from serializers import * 
-from permissions import *
 
 # all
 class Players(ListCreateAPIView):
+	permission_classes = (permissions.AllowAny,)
 	queryset = User.objects.all()
 	serializer_class = PlayerSerializer
 	lookup_field = 'username'
 
+
 # read for all, modify for owner
 class PlayerDetails(RetrieveUpdateAPIView):
-	permission_classes = (permissions.IsAuthenticatedOrReadOnly, CanModifyUserDetails)
+	permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsCurrentPlayerOrReadOnly)
 	queryset = User.objects.all()
 	serializer_class = PlayerSerializer
 	lookup_field = 'username'
@@ -30,6 +33,7 @@ class PlayerDetails(RetrieveUpdateAPIView):
 
 #all
 class PlayerGames(ListAPIView):
+	permission_classes = (permissions.AllowAny,)
 	serializer_class = GameSerializer
 	lookup_url_kwarg = 'username'
 
@@ -47,6 +51,8 @@ class PlayerGames(ListAPIView):
 
 # all
 class PlayerStats(APIView):
+	permission_classes = (permissions.AllowAny,)
+
 	def get(self, request, username, format=None):
 		player = get_object_or_404(User, username=username)
 		
@@ -65,6 +71,7 @@ class PlayerStats(APIView):
 
 # all
 class Games(ListAPIView):
+	permission_classes = (permissions.AllowAny,)
 	serializer_class = GameSerializer
 
 	def get_queryset(self):
@@ -79,6 +86,7 @@ class Games(ListAPIView):
 
 # all
 class GameDetails(RetrieveAPIView):
+	permission_classes = (permissions.AllowAny,)
 	queryset = Game.objects.all()
 	serializer_class = GameSerializer
 
@@ -86,7 +94,7 @@ class GameDetails(RetrieveAPIView):
 # authenticated
 class Requests(ListCreateAPIView):
 	serializer_class = GameRequestSerializer
-
+	permission_classes = (permissions.IsAuthenticated,)
 	def get_queryset(self):
 		params = {}
 		if 'requesting' in self.request.query_params:
@@ -95,15 +103,21 @@ class Requests(ListCreateAPIView):
 			params['requested'] = get_object_or_404(User, username=self.request.query_params['requested'])
 		return GameRequest.objects.all().filter(**params)
 
+	def perform_create(self, serializer):
+		serializer.save(requesting=self.request.user)
+
 
 # read for authenticated, delete for requesting or requested
 class RequestDetails(RetrieveDestroyAPIView):
 	queryset = GameRequest.objects.all()
 	serializer_class = GameRequestSerializer
+	permission_classes = (permissions.IsAuthenticated, IsRequestedOrRequesting)
 
 
 # read for all, create for players of game
 class Moves(APIView):
+	permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
 	def get(self, request, pk, format=None):
 		game = get_object_or_404(Game, pk=pk)
 		moves = Move.objects.all().filter(game=game)
@@ -112,6 +126,7 @@ class Moves(APIView):
 
 	def post(self, request, pk, format=None):
 		request.data['game'] = pk
+		request.data['player'] = request.user
 		serializer = MoveSerializer(data=request.data)
 		if serializer.is_valid():
 			serializer.save()
@@ -128,20 +143,24 @@ class Moves(APIView):
 
 # requested only
 class Accepted(APIView):
+	permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 	def post(self, request, format=None):
 		if not 'request-id' in request.data:
+			print request.data
 			return Response({"detail": "request-id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
 		req = get_object_or_404(GameRequest, pk=request.data['request-id'])
-		
-		game = Game()
-		game.player_a = req.requesting
-		game.player_b = req.requested
-		game.save()
-		game_ser = GameSerializer(game, context={"request": request})
+		if is_requested(request, req):
+			game = Game()
+			game.player_a = req.requesting
+			game.player_b = req.requested
+			game.save()
+			game_ser = GameSerializer(game, context={"request": request})
 
-		req.delete()
-		return Response(game_ser.data, status=status.HTTP_201_CREATED)
+			req.delete()
+			return Response(game_ser.data, status=status.HTTP_201_CREATED)
+		else:
+			return Response({"detail": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
 
 
 """0 1 2

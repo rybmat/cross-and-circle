@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework import exceptions
 from datetime import datetime
 import models
 
@@ -31,7 +32,7 @@ class PlayerSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class GameRequestSerializer(serializers.HyperlinkedModelSerializer):
-	requesting = serializers.SlugRelatedField(queryset=models.User.objects.all(), slug_field='username')
+	requesting = serializers.SlugRelatedField(queryset=models.User.objects.all(), slug_field='username', required=False)
 	requested = serializers.SlugRelatedField(queryset=models.User.objects.all(), slug_field='username')
 	class Meta:
 		model = models.GameRequest
@@ -75,7 +76,7 @@ class MoveSerializer(serializers.ModelSerializer):
 					
 					players = (game.player_a.id, game.player_b.id,)
 					if data['player'] not in players:
-						raise serializers.ValidationError({'player': 'player otside of game'})
+						raise exceptions.PermissionDenied({'player': 'player otside of game'})
 					
 					moves = game.move_set.order_by('-timestamp').values()
 
@@ -83,18 +84,12 @@ class MoveSerializer(serializers.ModelSerializer):
 						raise serializers.ValidationError({'player': 'Second player is taking turn'})
 
 				except models.Game.DoesNotExist:
-					raise serializers.ValidationError({'details': 'game with given id does not exist'})
+					raise serializers.ValidationError({'detail': 'game with given id does not exist'})
 
 		if 'position' in data and data['position'] not in range(9):
 			raise serializers.ValidationError({'position': 'position index shoud be in range 0..8'})
 
 		return super(MoveSerializer, self).to_internal_value(data)
-
-
-# def required_fields(req, data):
-# 	for r in req:
-# 		if r not in data:
-# 			raise serializers.ValidationError({'detail': 'Missing parameters'})
 
 
 def user_or_validationerror(fieldname, username):
