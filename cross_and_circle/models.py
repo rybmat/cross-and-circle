@@ -34,3 +34,7 @@ class GameRequest(models.Model):
 	requested = models.ForeignKey(User, related_name='requested')
 	date = models.DateTimeField(auto_now_add=True)
 
+
+class POEToken(models.Model):
+	token = models.CharField(max_length=50, unique=True)
+
