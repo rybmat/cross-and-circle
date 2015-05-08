@@ -3,7 +3,8 @@ from rest_framework.urlpatterns import format_suffix_patterns
 import views
 
 urlpatterns = patterns('',
-    
+    url(r'^token/$', views.Token.as_view(), name='token'),
+
     url(r'^players/$', views.Players.as_view(), name='users'),
     url(r'^players/(?P<username>[A-Za-z_0-9]+)/$', views.PlayerDetails.as_view(), name='user-detail'),
     url(r'^players/(?P<username>[A-Za-z_0-9]+)/stats/$', views.PlayerStats.as_view(), name='user-stats'),

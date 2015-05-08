@@ -11,9 +11,15 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView, ListCreateAPIV
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
+from rest_framework.exceptions import *
 
 from datetime import datetime
+from uuid import uuid4
 
+class Token(APIView):
+	def get(self, request):
+		token = uuid4()
+		return Response({"token": token})
 
 # all
 class Players(ListCreateAPIView):
@@ -21,6 +27,10 @@ class Players(ListCreateAPIView):
 	queryset = User.objects.all()
 	serializer_class = PlayerSerializer
 	lookup_field = 'username'
+
+	def perform_create(self, serializer):
+		check_poe_tocken(self.request)
+		serializer.save()
 
 
 # read for all, modify for owner
@@ -104,6 +114,7 @@ class Requests(ListCreateAPIView):
 		return GameRequest.objects.all().filter(**params)
 
 	def perform_create(self, serializer):
+		check_poe_tocken(self.request)
 		serializer.save(requesting=self.request.user)
 
 
@@ -182,5 +193,17 @@ def check_winner(game_id):
 		if board[s[0]] is not None and board[s[0]] == board[s[1]] and board[s[0]] == board[s[2]]:
 			return board[s[0]]
 	return None
+
+
+def check_poe_tocken(request):
+	if 'token' not in request.query_params:
+		raise MethodNotAllowed("POST", detail="POE token missing")
+
+	token = POEToken(token=request.query_params['token'])
+
+	try:
+		token.save()
+	except Exception as e:
+		raise MethodNotAllowed("POST", detail="POE token duplication")
 
 
