@@ -37,7 +37,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'cross_and_circle'
+    'cross_and_circle', 
+    'bootstrap3',
+    #'bootstrap3_datetime',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -48,6 +50,17 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': ['game/templates/'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            # ... some options here ...
+        },
+    },
+]
 
 ROOT_URLCONF = 'cac.urls'
 
@@ -92,3 +105,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     )
 }
+
+EMAIL_HOST_PASSWORD = 'tournaments@put.poznan.pl'
+EMAIL_HOST_USER = "tournamentsai@gmail.com"
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+DEFAULT_FROM_EMAIL = "tournamentsai@gmail.com"
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

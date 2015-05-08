@@ -8,6 +8,7 @@ urlpatterns = patterns('',
     # url(r'^$', 'cac.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
     url(r'^rest/', include('cross_and_circle.urls')),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    url(r'^game/', include('game.urls')),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     #url(r'^admin/', include(admin.site.urls)),
 )
