@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include, url
 from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework.authtoken.views import obtain_auth_token
 import views
 
 urlpatterns = patterns('',
@@ -18,6 +19,8 @@ urlpatterns = patterns('',
     url(r'^requests/(?P<pk>[0-9]+)/$', views.RequestDetails.as_view(), name='gamerequest-detail'),
 
     url(r'^accepted-requests/', views.Accepted.as_view(), name='accepted-requests'),
+
+    url(r'^api-token-auth/', obtain_auth_token),
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)
