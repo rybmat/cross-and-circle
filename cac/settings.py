@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'cross_and_circle', 
     'bootstrap3',
     #'bootstrap3_datetime',
+    'corsheaders',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -50,6 +51,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 )
 
 TEMPLATES = [
@@ -62,6 +65,8 @@ TEMPLATES = [
         },
     },
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'cac.urls'
 
