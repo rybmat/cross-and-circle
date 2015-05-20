@@ -5,7 +5,9 @@
 var crossAndCircle = angular.module('crossAndCircle', [
   'ngRoute',
   'cacControllers',
-  'restangular'
+  'cacServices',
+  'restangular',
+  'ngWebSocket',
 ]);
 
 crossAndCircle.config(['$routeProvider', 'RestangularProvider',

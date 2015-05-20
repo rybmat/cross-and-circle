@@ -4,18 +4,28 @@
 
 var cacControllers = angular.module('cacControllers', []);
 	
-	cacControllers.controller('LoginCtrl', ['$scope', 'Restangular', function($scope, Restangular) {
-		var tokenRes = Restangular.all('api-token-auth/');
+	cacControllers.controller('LoginCtrl', ['$scope', 'Restangular', 'WebSock', 'Auth', 
+		function($scope, Restangular, WebSock, Auth) {
+			var tokenRes = Restangular.all('api-token-auth/');
 
-		$scope.login = function(username, password) {
-			tokenRes.post({"username":$scope.username, "password":$scope.password}).then(function(resp) {
-			   console.log("token", resp.token);
-			 }, function() {
-			  console.log("There was an error saving");
-			 });
+			$scope.login = function(username, password) {
+				tokenRes.post({"username":$scope.username, "password":$scope.password}).then(function(resp) {
+							console.log("token", resp.token);
+				 	$scope.errors = null;
+					Auth.setUsername($scope.username);
+					Auth.setToken(resp.token);
+				}, function(resp) {
+				  			console.log(resp);
+					$scope.errors = resp.data.non_field_errors;
+				});
 
-		}
-	}]);
+			}
+		}]);
+
+
+
+
+
 // phonecatControllers.controller('PhoneListCtrl', ['$scope', 'Phone',
 //   function($scope, Phone) {
 //     $scope.phones = Phone.query();

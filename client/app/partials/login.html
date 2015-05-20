@@ -1,3 +1,18 @@
-Username: <input type="text" ng-model=username></br>
-Password: <input type="password" ng-model=password></br>
-<button ng-click="login()">Login</button>
+<ul>
+	<li ng-repeat="e in errors">{{e}}</li>
+</ul>
+<form novalidate class="css-form" name="form">
+	<div ng-show="form.$submitted || form.uName.$touched">
+	      <div ng-show="form.uName.$error.required">Type your username.</div>
+	</div>
+	Username:
+	<input name="uName" type="text" ng-model="username" required>
+	<br/>
+	Password:
+	<input name="uPassword" type="password" ng-model="password" required>
+	<div ng-show="form.$submitted || form.uPassword.$touched">
+	      <div ng-show="form.uPassword.$error.required">Password is required.</div>
+	</div>
+	<br/>
+<input type="submit" ng-click="login()" value="Log in"></input>
+<form>
