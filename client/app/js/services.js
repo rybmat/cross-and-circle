@@ -36,7 +36,7 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 			},
 			setUsername: function(u) {
 				username = u;
-				WebSock.send({type: "hello", username: u});	// register user at ws server
+				WebSock.send({type: "hello", username: u});	// register user at websocket server
 			}
 		}
 		return methods;

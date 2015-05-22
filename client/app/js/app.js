@@ -4,21 +4,22 @@
 
 var crossAndCircle = angular.module('crossAndCircle', [
   'ngRoute',
+  'cacDirectives',
   'cacControllers',
   'cacServices',
   'restangular',
   'ngWebSocket',
 ]);
 
-crossAndCircle.config(['$routeProvider', 'RestangularProvider',
+crossAndCircle.config(['$routeProvider', 'RestangularProvider', 
   function($routeProvider, RestangularProvider) {
     $routeProvider.
-      when('/login', {
-        templateUrl: 'partials/login.html',
-        controller: 'LoginCtrl'
+      when('/register', {
+        templateUrl: 'partials/register.html',
+        
       }).
       otherwise({
-        redirectTo: '/login'
+        redirectTo: '/register'
       });
 
       RestangularProvider.setBaseUrl('http://127.0.0.1:8888/rest/');

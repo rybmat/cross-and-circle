@@ -4,8 +4,8 @@
 
 var cacControllers = angular.module('cacControllers', []);
 	
-	cacControllers.controller('LoginCtrl', ['$scope', 'Restangular', 'WebSock', 'Auth', 
-		function($scope, Restangular, WebSock, Auth) {
+	cacControllers.controller('LoginCtrl', ['$scope', 'Restangular', 'Auth', 
+		function($scope, Restangular, Auth) {
 			var tokenRes = Restangular.all('api-token-auth/');
 
 			$scope.login = function(username, password) {
@@ -14,31 +14,44 @@ var cacControllers = angular.module('cacControllers', []);
 				 	$scope.errors = null;
 					Auth.setUsername($scope.username);
 					Auth.setToken(resp.token);
+					// TODO: redirect
 				}, function(resp) {
-				  			console.log(resp);
+				  	console.log(resp);
 					$scope.errors = resp.data.non_field_errors;
 				});
 
 			}
 		}]);
 
+	cacControllers.controller('RegisterCtrl', ['$scope', '$window', 'Restangular', 'Auth', 
+		function($scope, $window, Restangular, Auth) {
+			$scope.master = {};
+
+			var poeTokenRes = Restangular.one('token/');
+			var usersRes = Restangular.all('players/');
+
+			var poeToken = null;
+			poeTokenRes.get().then(function(resp) {
+				poeToken = resp.token
+				console.log(resp.token);
+			}, function(resp) {	
+				$scope.errors = resp.data;
+				console.log(resp);
+			});
+
+			$scope.register = function(user) {
+				$scope.$broadcast('show-errors-check-validity');
+
+				if (!this.form.$valid){ console.log('form invalid'); return;}
+				usersRes.post(user, {token: poeToken}).then(function(resp) {
+					console.log(resp);
+					$window.location.href = '/app/#login';
+				}, function(resp) {
+					$scope.errors = resp.data;
+					console.log(resp);
+				});
+			}
+		}]);
 
 
 
-
-// phonecatControllers.controller('PhoneListCtrl', ['$scope', 'Phone',
-//   function($scope, Phone) {
-//     $scope.phones = Phone.query();
-//     $scope.orderProp = 'age';
-//   }]);
-
-// phonecatControllers.controller('PhoneDetailCtrl', ['$scope', '$routeParams', 'Phone',
-//   function($scope, $routeParams, Phone) {
-//     $scope.phone = Phone.get({phoneId: $routeParams.phoneId}, function(phone) {
-//       $scope.mainImageUrl = phone.images[0];
-//     });
-
-//     $scope.setImage = function(imageUrl) {
-//       $scope.mainImageUrl = imageUrl;
-//     }
-//   }]);
