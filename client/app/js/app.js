@@ -18,6 +18,7 @@ crossAndCircle.config(['$routeProvider', 'RestangularProvider',
         templateUrl: 'partials/register.html',
         
       }).
+      when('/login', {templateUrl: 'partials/login.html'}).
       otherwise({
         redirectTo: '/register'
       });

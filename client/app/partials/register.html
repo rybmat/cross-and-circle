@@ -53,23 +53,24 @@
     </div>
     <div class="panel-body">
       <form name="form" class="css-form form">
-          <p ng-repeat="e in errors.non_field_errors">{{e}}</p>
+          <p ng-repeat="e in loginErrors.non_field_errors">{{e}}</p>
 
           <div class="form-group" show-errors='{ showSuccess: true }'>
             <label for="input-username" > Userame:</label>
             <input id="input-username" type="text" class="form-control" ng-model="username" name="uName" required="" placeholder="Type your username"/>
             
+            <p ng-repeat="e in loginErrors.username">{{e}}</p>
             <div ng-show="form.uName.$error.required" class="help-block">Username is required</div>          
           </div>
 
           <div class="form-group" show-errors>
             <label for="input-password"> Password:</label>
             <input id="password" name="uPassword" type="password" class="form-control" ng-model="password" required="" placeholder="Type your password">
+            <p ng-repeat="e in loginErrors.password">{{e}}</p>
             <div ng-show="form.uPassword.$error.required" class="help-block">Password is required.</div> 
           </div>
 
-          <input type="button" ng-click="login()" class="btn btn-success" value="Sign In" />
-
+          <input type="button" ng-click="signIn()" class="btn btn-success" value="Sign In" />
       </form>
     </div>
   </div>
