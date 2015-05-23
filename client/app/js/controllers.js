@@ -31,7 +31,6 @@ var cacControllers = angular.module('cacControllers', []);
 
 					console.log("token", $scope.loggedUserToken);
 					$location.path('/login');
-					console.log('aaa');
 				}, function(resp) {
 				  	console.log(resp);
 					$scope.loginErrors = resp.data;

@@ -90,6 +90,12 @@ class Games(ListAPIView):
 			params['player_a'] = get_object_or_404(User, username=self.request.query_params['player_a'])
 		if 'player_b' in self.request.query_params:
 			params['player_b'] = get_object_or_404(User, username=self.request.query_params['player_b'])
+		
+		in_progress = self.request.query_params.get('in_progress', None)
+		if in_progress:
+			params['winner'] = None
+		elif in_progress is not None:
+			return Game.objects.all().filter(**params).exclude(winner=None)
 
 	 	return Game.objects.all().filter(**params)
 
