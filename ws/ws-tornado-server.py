@@ -13,8 +13,13 @@ class Handler(tornado.websocket.WebSocketHandler):
         sockets[msg['username']] = self
         print sockets
 
+    def on_bye(self, msg):
+        del sockets[msg['username']]
+        print "bye", sockets
+
     msg_types = {
         'hello': on_hello,
+        'bye': on_bye,
     }
 
     def open(self):

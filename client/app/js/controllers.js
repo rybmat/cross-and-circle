@@ -4,17 +4,16 @@
 
 var cacControllers = angular.module('cacControllers', []);
 	
-	cacControllers.controller('MainCtrl', ['$location', '$scope', 'Restangular',
-		function($location, $scope, Restangular) {
-			$scope.loggedUsername = null;
-			$scope.loggedUserToken = null;
-			$scope.loggedIn = false;
+	cacControllers.controller('MainCtrl', ['$localStorage', 'WebSock', '$location', '$scope', 'Restangular',
+		function($localStorage, WebSock, $location, $scope, Restangular) {
+			// $scope.loggedUsername = null;
+			// $scope.loggedUserToken = null;
+			// $scope.loggedIn = false;
 
-
-			// TODO: try to read from local storage
+			$scope.storage = $localStorage;
 			
 			$scope.$watch(function() { return $location.path(); }, function(newValue, oldValue){  
-			    if ($scope.loggedIn == false && newValue != '/register'){  
+			    if ($scope.storage.loggedIn == false && newValue != '/register'){  
 			            $location.path('/register');  
 			    }  
 			});
@@ -25,16 +24,29 @@ var cacControllers = angular.module('cacControllers', []);
 				tokenRes.post({"username":username, "password":password}).then(function(resp) {
 							
 				 	$scope.errors = null;
-					$scope.loggedUsername = username;
-					$scope.loggedUserToken = resp.token;
-					$scope.loggedIn = true;
+					$scope.storage.loggedUsername = username;
+					$scope.storage.loggedUserToken = resp.token;
+					$scope.storage.loggedIn = true;
+					WebSock.send({type: "hello", username: username});
+					//TODO: remember in local storage
 
-					console.log("token", $scope.loggedUserToken);
-					$location.path('/login');
+					console.log("token", $scope.storage.loggedUserToken);
+					$location.path('/menu');
 				}, function(resp) {
 				  	console.log(resp);
 					$scope.loginErrors = resp.data;
 				});
+
+				//TODO: listen for messages and do sth
+			}
+
+			$scope.logout = function() {
+				WebSock.send({type: "bye", username: $scope.loggedUsername});
+				$scope.storage.loggedUsername = null;
+				$scope.storage.loggedUserToken = null;
+				$scope.storage.loggedIn = false;
+
+				$location.path('/register');
 
 			}
 		}])

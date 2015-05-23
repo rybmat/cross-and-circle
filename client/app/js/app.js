@@ -9,6 +9,7 @@ var crossAndCircle = angular.module('crossAndCircle', [
   'cacServices',
   'restangular',
   'ngWebSocket',
+  'ngStorage'
 ]);
 
 crossAndCircle.config(['$routeProvider', 'RestangularProvider', 
@@ -18,7 +19,8 @@ crossAndCircle.config(['$routeProvider', 'RestangularProvider',
         templateUrl: 'partials/register.html',
         
       }).
-      when('/login', {templateUrl: 'partials/login.html'}).
+      when('/menu', {
+        templateUrl: 'partials/menu.html'}).
       otherwise({
         redirectTo: '/register'
       });

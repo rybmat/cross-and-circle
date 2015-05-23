@@ -1,7 +1,7 @@
 /* app css stylesheet */
-body {
+/*body {
 	padding: 2%;
-}
+}*/
 
 .form-group .help-block {
   display: none;
@@ -9,5 +9,9 @@ body {
 
 .form-group.has-error .help-block {
   display: block;
+}
+
+.right {
+	float: right;
 }
 
