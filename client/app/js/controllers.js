@@ -92,5 +92,20 @@ var cacControllers = angular.module('cacControllers', []);
 			}
 		}]);
 
+	cacControllers.controller('MenuCtrl', ['$scope', 'Restangular', 
+		function($scope, Restangular) {
+			$scope.items = [];	// should contain at least {key: , value:}
+			var statsRes = Restangular.one('players/' + $scope.storage.loggedUsername + '/stats/');
+
+			$scope.stats = function() {
+				statsRes.get().then(function(resp) {
+					console.log(resp);
+					$scope.items = [{key:"Games total", value:resp.games}, 
+						{key:"Won", value:resp.won},
+						{key:"Lost", value:resp.lost}];
+				});
+			}
+		}]);
+
 
 

@@ -3,8 +3,19 @@
   <h1>Some fancy header</h1>
 </div>
 
-<div class="list-group">
-  <a href="#" class="list-group-item">New game</a>
-  <a href="#" class="list-group-item">Your statistics</a>
-  <a href="#" class="list-group-item">Log out</a>
+
+
+<div class="list-group menu col-md-6">
+  <a href="" class="list-group-item list-group-item-danger">New game</a>
+  <a href="" class="list-group-item">Games in progress</a>
+  <a href="" class="list-group-item">Pending requests</a>
+  <a href="" class="list-group-item">Finished games</a>
+  <a href="" ng-click="stats()" class="list-group-item">Statistics</a>
+  <a href="" class="list-group-item list-group-item-info" ng-click="logout()">Log out</a>
+</div>
+
+<div class="panel panel-default col-md-6">
+	<ul class="list-group">
+	  <li class="list-group-item" ng-repeat="i in items"><strong class="key">{{i.key}}:</strong>{{i.value}}</li>
+	</ul>
 </div>

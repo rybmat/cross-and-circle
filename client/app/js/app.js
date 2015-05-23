@@ -20,7 +20,9 @@ crossAndCircle.config(['$routeProvider', 'RestangularProvider',
         
       }).
       when('/menu', {
-        templateUrl: 'partials/menu.html'}).
+        templateUrl: 'partials/menu.html',
+        controller: 'MenuCtrl'
+      }).
       otherwise({
         redirectTo: '/register'
       });
