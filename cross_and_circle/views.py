@@ -110,7 +110,7 @@ class GameDetails(RetrieveAPIView):
 # authenticated
 class Requests(ListCreateAPIView):
 	serializer_class = GameRequestSerializer
-	permission_classes = (permissions.IsAuthenticated,)
+	permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 	def get_queryset(self):
 		params = {}
 		if 'requesting' in self.request.query_params:

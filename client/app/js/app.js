@@ -9,7 +9,8 @@ var crossAndCircle = angular.module('crossAndCircle', [
   'cacServices',
   'restangular',
   'ngWebSocket',
-  'ngStorage'
+  'ngStorage',
+  'ngResource'
 ]);
 
 crossAndCircle.config(['$routeProvider', 'RestangularProvider', 

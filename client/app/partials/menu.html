@@ -6,7 +6,7 @@
 
 
 <div class="list-group menu col-md-6">
-  <a href="" class="list-group-item list-group-item-danger">New game</a>
+  <a href="" ng-click="newGame()" class="list-group-item list-group-item-danger">New game</a>
   <a href="" class="list-group-item">Games in progress</a>
   <a href="" class="list-group-item">Pending requests</a>
   <a href="" class="list-group-item">Finished games</a>
@@ -15,7 +15,32 @@
 </div>
 
 <div class="panel panel-default col-md-6">
-	<ul class="list-group">
-	  <li class="list-group-item" ng-repeat="i in items"><strong class="key">{{i.key}}:</strong>{{i.value}}</li>
-	</ul>
+	<div class="panel-heading">
+      <h3>{{head}}</h3>
+    </div>
+	
+	<div ng-show="!showForm">
+		<form name="form" class="css-form form">
+		  <div class="form-group">
+		    <input id="input-search" type="text" class="form-control" ng-model="query" name="search" required="" placeholder="Search"/>
+		  </div>
+		</form>
+
+		<div class="list-group">
+		  <a href="" class="list-group-item" ng-repeat="i in items | filter:query |orderBy:'key'" ng-click="i.foo(i)"><strong class="key">{{i.key}}</strong>{{i.value}}</a>
+		</div>
+	</div>
+
+	<div ng-show="showForm">
+		<form name="form" class="css-form form">
+		  <div class="form-group">
+				<input id="input-search" type="text" class="form-control" ng-model="opponent" name="uOpponent" required="" placeholder="Type opponent name"/>
+		  		<p class="text-danger" ng-repeat="e in errors">{{e}}</p>
+
+		  </div>
+		  <input type="button" ng-click="makeRequest()" class="btn btn-primary" value="Send Request" />
+		</form>
+	</div>
+			
+	</div>
 </div>

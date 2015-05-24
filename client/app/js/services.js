@@ -18,3 +18,46 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 		    };
 		    return methods;
 		}]);
+
+	cacServices.factory('GameRequests', ['$localStorage', 'Restangular', 
+		function($localStorage, Restangular) {
+			var resource = Restangular.one('requests/');
+
+			var methods = {
+				send: function(opponent, poeToken) {
+					var payload = {requested: opponent};
+					var h = {'Authorization': 'Token ' + $localStorage.loggedUserToken};
+
+					return resource.post('', payload, {"token": poeToken}, h);
+				}
+			}
+
+			return methods;
+		}]);
+
+	cacServices.factory('AuthToken', ['Restangular', 
+		function (Restangular) {
+			var methods = {
+				get: function(uname, pass) {
+					return Restangular.all('api-token-auth/').post(
+						{"username": uname, "password": pass});
+				}
+			}
+			return methods;
+		}]);
+
+	cacServices.factory('PoeToken', ['Restangular', 
+		function (Restangular) {
+			var poeTokenRes = Restangular.one('token/');
+
+			var methods = {
+				get: function() {
+					return poeTokenRes.get();
+				}
+			}
+			return methods;
+		}]);
+
+	
+
+	
