@@ -9,7 +9,6 @@
   <a href="" ng-click="newGame()" class="list-group-item list-group-item-danger">New game</a>
   <a href="" class="list-group-item">Games in progress</a>
   <a href="" ng-click="pendingRequests()" class="list-group-item">Pending requests</a>
-  <a href="" class="list-group-item">Finished games</a>
   <a href="" ng-click="stats()" class="list-group-item">Statistics</a>
   <a href="" class="list-group-item list-group-item-info" ng-click="logout()">Log out</a>
 </div>
@@ -29,7 +28,7 @@
 		<div class="list-group">
 		  <a href="" class="list-group-item" ng-repeat="i in items | filter:query " ng-click="i.foo(i)"><strong class="key">{{i.key}}</strong>{{i.value}}</a>
 		</div>
-		<nav>
+		<nav ng-show="showPager">
 		  <ul class="pager">
 		    <li class="previous" ng-click="getPage(pageFoo, false)"><a href=""><span aria-hidden="true">&larr;</span> prev</a></li>
 		    <li class="next" ng-click="getPage(pageFoo, true)"><a href="">next <span aria-hidden="true">&rarr;</span></a></li>

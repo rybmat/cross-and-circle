@@ -88,8 +88,8 @@ var cacControllers = angular.module('cacControllers', []);
 			$scope.stats = function() {
 				$scope.head = "Your stats";
 				$scope.showForm = null;
+				$scope.showPager = null;
 				Players.stats($scope.storage.loggedUsername).then(function(resp) {
-					console.log(resp);
 					$scope.items = [{key:"Games total", value:resp.games}, 
 						{key:"Won", value:resp.won},
 						{key:"Lost", value:resp.lost}];
@@ -138,7 +138,6 @@ var cacControllers = angular.module('cacControllers', []);
 						$scope.page -= 1;
 					}
 					foo();
-		
 			}
 
 			$scope.pendingRequests = function() {
@@ -146,6 +145,7 @@ var cacControllers = angular.module('cacControllers', []);
 				$scope.head = "Pending requests";
 				$scope.errors = []
 				$scope.page = 0;
+				$scope.showPager = true;
 
 				var page = function() {
 					GameRequests.getList($scope.page).then(function(resp) {
@@ -163,7 +163,12 @@ var cacControllers = angular.module('cacControllers', []);
 			}
 
 			$scope.acceptRequest = function(i) {
-				console.log("accept");
+				GameRequests.accept(i.obj.id).then(function(resp) {
+					console.log(resp);
+					// TODO: redirect to game page
+				}, function(resp) {
+					console.log(resp);
+				});
 			}
 
 		}]);
