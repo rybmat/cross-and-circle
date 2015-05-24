@@ -44,8 +44,8 @@ var cacControllers = angular.module('cacControllers', []);
 			}
 		}])
 
-	cacControllers.controller('LoginCtrl', ['$scope', 'Restangular', 
-		function($scope, Restangular) {
+	cacControllers.controller('LoginCtrl', ['$scope', 
+		function($scope) {
 			$scope.signIn = function() {
 				$scope.$broadcast('show-errors-check-validity');
 				if (!this.form.$valid){ console.log('form invalid'); return;}
@@ -54,11 +54,9 @@ var cacControllers = angular.module('cacControllers', []);
 			}
 		}]);
 
-	cacControllers.controller('RegisterCtrl', ['PoeToken', '$scope', '$location', 'Restangular', 
-		function(PoeToken, $scope, $location, Restangular) {
+	cacControllers.controller('RegisterCtrl', ['Players', 'PoeToken', '$scope', '$location', 
+		function(Players, PoeToken, $scope, $location) {
 			$scope.master = {};
-
-			var usersRes = Restangular.all('players/');
 
 			var poeToken = null;
 			PoeToken.get().then(function(resp) {
@@ -73,7 +71,7 @@ var cacControllers = angular.module('cacControllers', []);
 				$scope.$broadcast('show-errors-check-validity');
 
 				if (!this.form.$valid){ console.log('form invalid'); return;}
-				usersRes.post(user, {token: poeToken}).then(function(resp) {
+				Players.create(user, poeToken).then(function(resp) {
 					console.log(resp);
 					$scope.login(user.username, user.password);
 				}, function(resp) {
@@ -83,16 +81,14 @@ var cacControllers = angular.module('cacControllers', []);
 			}
 		}]);
 
-	cacControllers.controller('MenuCtrl', ['PoeToken', 'GameRequests', '$scope', 'Restangular', 
-		function(PoeToken, GameRequests, $scope, Restangular) {
+	cacControllers.controller('MenuCtrl', ['Players', 'PoeToken', 'GameRequests', '$scope', 
+		function(Players, PoeToken, GameRequests, $scope) {
 			$scope.items = [];	// should contain at least {key: , value:, foo:""}
-			var statsRes = Restangular.one('players/' + $scope.storage.loggedUsername + '/stats/');
-			
 			
 			$scope.stats = function() {
 				$scope.head = "Your stats";
 				$scope.showForm = null;
-				statsRes.get().then(function(resp) {
+				Players.stats($scope.storage.loggedUsername).then(function(resp) {
 					console.log(resp);
 					$scope.items = [{key:"Games total", value:resp.games}, 
 						{key:"Won", value:resp.won},
@@ -120,7 +116,7 @@ var cacControllers = angular.module('cacControllers', []);
 					return;
 				}
 
-				Restangular.one('players/' + $scope.opponent + '/').get().then(function(resp) {
+				Players.get($scope.opponent).then(function(resp) {
 					GameRequests.send($scope.opponent, $scope.poeToken).then(
 						function(resp) {
 							$scope.errors = ['Request sent! Please wait for accepting the request.'];

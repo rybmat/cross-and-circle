@@ -58,6 +58,22 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 			return methods;
 		}]);
 
-	
+	cacServices.factory('Players', ['Restangular', 
+		function (Restangular) {
 
+			var methods = {
+				get: function(uname) {
+					return Restangular.one('players/' + uname + '/').get();
+				},
+				stats: function(uname) {
+					return Restangular.one('players/' + uname+ '/stats/').get();
+				},
+				create: function(user, poe) {
+					return Restangular.all('players/').post(
+						user, {token: poe});
+				}
+			}
+
+			return methods;
+		}]);
 	
