@@ -99,6 +99,7 @@ var cacControllers = angular.module('cacControllers', []);
 			$scope.newGame = function() {
 				$scope.head = "New game";
 				$scope.showForm = "true";
+				$scope.opponent = "";
 				$scope.errors = []
 				PoeToken.get().then(function(resp) {
 					$scope.poeToken = resp.token;
@@ -128,6 +129,43 @@ var cacControllers = angular.module('cacControllers', []);
 					$scope.errors = ['Such player does not exists'];
 				});
 			}
+
+			$scope.getPage = function(foo, next) {
+				$scope.items = [];
+					if (next == true) {
+						$scope.page += 1;
+					} else if ($scope.page > 1) {
+						$scope.page -= 1;
+					}
+					foo();
+		
+			}
+
+			$scope.pendingRequests = function() {
+				$scope.showForm = "";
+				$scope.head = "Pending requests";
+				$scope.errors = []
+				$scope.page = 0;
+
+				var page = function() {
+					GameRequests.getList($scope.page).then(function(resp) {
+						resp.results.forEach(function(item) {
+							$scope.items.push(
+									{key: item.requesting, value: null, foo: $scope.acceptRequest, obj: item}
+								);
+						}, function() {
+							$scope.page -= 1;
+						});
+					});
+				}
+				$scope.pageFoo = page;
+				$scope.getPage(page, true);
+			}
+
+			$scope.acceptRequest = function(i) {
+				console.log("accept");
+			}
+
 		}]);
 
 

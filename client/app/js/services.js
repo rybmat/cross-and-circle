@@ -29,6 +29,9 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 					var h = {'Authorization': 'Token ' + $localStorage.loggedUserToken};
 
 					return resource.post('', payload, {"token": poeToken}, h);
+				},
+				getList: function(pageNum) {
+					return resource.get({page: pageNum});
 				}
 			}
 
