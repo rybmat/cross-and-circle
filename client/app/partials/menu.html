@@ -18,7 +18,7 @@
       <h3>{{head}}</h3>
     </div>
 	
-	<div ng-show="!showForm">
+	<div ng-show="view == 'list'">
 		<form name="form" class="css-form form">
 		  <div class="form-group">
 		    <input id="input-search" type="text" class="form-control" ng-model="query" name="search" required="" placeholder="Search"/>
@@ -30,13 +30,13 @@
 		</div>
 		<nav ng-show="showPager">
 		  <ul class="pager">
-		    <li class="previous" ng-click="getPage(pageFoo, false)"><a href=""><span aria-hidden="true">&larr;</span> prev</a></li>
-		    <li class="next" ng-click="getPage(pageFoo, true)"><a href="">next <span aria-hidden="true">&rarr;</span></a></li>
+		    <li class="previous" ng-click="prevPage()"><a href=""><span aria-hidden="true">&larr;</span> prev</a></li>
+		    <li class="next" ng-click="nextPage()"><a href="">next <span aria-hidden="true">&rarr;</span></a></li>
 		  </ul>
 		</nav>
 	</div>
 
-	<div ng-show="showForm">
+	<div ng-show="view == 'form'">
 		<form name="form" class="css-form form">
 		  <div class="form-group">
 				<input id="input-search" type="text" class="form-control" ng-model="opponent" name="uOpponent" required="" placeholder="Type opponent name"/>
@@ -45,7 +45,5 @@
 		  </div>
 		  <input type="button" ng-click="makeRequest()" class="btn btn-primary" value="Send Request" />
 		</form>
-	</div>
-			
 	</div>
 </div>

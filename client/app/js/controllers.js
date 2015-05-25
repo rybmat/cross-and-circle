@@ -87,7 +87,7 @@ var cacControllers = angular.module('cacControllers', []);
 			
 			$scope.stats = function() {
 				$scope.head = "Your stats";
-				$scope.showForm = null;
+				$scope.view = 'list';
 				$scope.showPager = null;
 				Players.stats($scope.storage.loggedUsername).then(function(resp) {
 					$scope.items = [{key:"Games total", value:resp.games}, 
@@ -98,9 +98,10 @@ var cacControllers = angular.module('cacControllers', []);
 			
 			$scope.newGame = function() {
 				$scope.head = "New game";
-				$scope.showForm = "true";
 				$scope.opponent = "";
 				$scope.errors = []
+				$scope.view = 'form';
+
 				PoeToken.get().then(function(resp) {
 					$scope.poeToken = resp.token;
 					console.log('token', resp.token);
@@ -130,24 +131,27 @@ var cacControllers = angular.module('cacControllers', []);
 				});
 			}
 
-			$scope.getPage = function(foo, next) {
+			$scope.nextPage = function() {
 				$scope.items = [];
-					if (next == true) {
-						$scope.page += 1;
-					} else if ($scope.page > 1) {
-						$scope.page -= 1;
-					}
-					foo();
+				$scope.page += 1;			
+				$scope.pageFoo();
+			}
+
+			$scope.prevPage = function() {
+				if ($scope.page <= 1) {return;}
+				$scope.items = [];
+				$scope.page -= 1;			
+				$scope.pageFoo();
 			}
 
 			$scope.pendingRequests = function() {
-				$scope.showForm = "";
+				$scope.view = 'list';
 				$scope.head = "Pending requests";
 				$scope.errors = []
 				$scope.page = 0;
 				$scope.showPager = true;
 
-				var page = function() {
+				$scope.pageFoo = function() {
 					GameRequests.getList($scope.page).then(function(resp) {
 						resp.results.forEach(function(item) {
 							$scope.items.push(
@@ -158,8 +162,7 @@ var cacControllers = angular.module('cacControllers', []);
 						});
 					});
 				}
-				$scope.pageFoo = page;
-				$scope.getPage(page, true);
+				$scope.nextPage();
 			}
 
 			$scope.acceptRequest = function(i) {
@@ -172,29 +175,28 @@ var cacControllers = angular.module('cacControllers', []);
 			}
 
 			$scope.gamesInProgress = function() {
-				$scope.showForm = "";
+				$scope.view = 'list';
 				$scope.head = "Your Games in Progress";
 				$scope.errors = []
 				$scope.page = 0;
 				$scope.showPager = true;
 
-				var page = function() {
-					Players.games($scope.storage.loggedUsername).then(function(resp) {
+				$scope.pageFoo = function() {
+					Players.games($scope.storage.loggedUsername, $scope.page).then(function(resp) {
 						resp.results.forEach(function(item) {
 							$scope.items.push(
-									{key: item.player_a + ' ' + item.player_b, value: null, foo: $scope.continueGame, obj: item}
+									{key: item.player_a + ' vs ' + item.player_b, value: null, foo: $scope.continueGame, obj: item}
 								);
 						}, function() {
 							$scope.page -= 1;
 						});
 					});
 				}
-				$scope.pageFoo = page;
-				$scope.getPage(page, true);
+				$scope.nextPage();
 			}
 
 			$scope.continueGame = function(i) {
-				// TODO
+				// TODO: redirect to game page
 			}
 		}]);
 
