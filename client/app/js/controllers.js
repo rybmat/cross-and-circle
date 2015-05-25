@@ -15,6 +15,10 @@ var cacControllers = angular.module('cacControllers', []);
 			    }  
 			});
 
+			if ($scope.storage.loggedUsername) {
+				WebSock.send({type: "hello", username: $scope.storage.loggedUsername});	
+			}
+
 			$scope.login = function(username, password) {
 				AuthToken.get(username, password).then(function(resp) {			
 				 	$scope.errors = null;
@@ -34,7 +38,7 @@ var cacControllers = angular.module('cacControllers', []);
 			}
 
 			$scope.logout = function() {
-				WebSock.send({type: "bye", username: $scope.loggedUsername});
+				WebSock.send({type: "bye", username: $scope.storage.loggedUsername});
 				$scope.storage.loggedUsername = null;
 				$scope.storage.loggedUserToken = null;
 				$scope.storage.loggedIn = false;
