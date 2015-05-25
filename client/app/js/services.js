@@ -77,6 +77,9 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 				create: function(user, poe) {
 					return Restangular.all('players/').post(
 						user, {token: poe});
+				},
+				games: function(uname) {
+					return Restangular.one('players/' + uname+ '/games/').get();
 				}
 			}
 

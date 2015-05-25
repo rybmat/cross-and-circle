@@ -171,6 +171,31 @@ var cacControllers = angular.module('cacControllers', []);
 				});
 			}
 
+			$scope.gamesInProgress = function() {
+				$scope.showForm = "";
+				$scope.head = "Your Games in Progress";
+				$scope.errors = []
+				$scope.page = 0;
+				$scope.showPager = true;
+
+				var page = function() {
+					Players.games($scope.storage.loggedUsername).then(function(resp) {
+						resp.results.forEach(function(item) {
+							$scope.items.push(
+									{key: item.player_a + ' ' + item.player_b, value: null, foo: $scope.continueGame, obj: item}
+								);
+						}, function() {
+							$scope.page -= 1;
+						});
+					});
+				}
+				$scope.pageFoo = page;
+				$scope.getPage(page, true);
+			}
+
+			$scope.continueGame = function(i) {
+				// TODO
+			}
 		}]);
 
 
