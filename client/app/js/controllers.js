@@ -85,8 +85,8 @@ var cacControllers = angular.module('cacControllers', []);
 			}
 		}]);
 
-	cacControllers.controller('MenuCtrl', ['Players', 'PoeToken', 'GameRequests', '$scope', 
-		function(Players, PoeToken, GameRequests, $scope) {
+	cacControllers.controller('MenuCtrl', ['$location', 'Players', 'PoeToken', 'GameRequests', '$scope', 
+		function($location, Players, PoeToken, GameRequests, $scope) {
 			$scope.items = [];	// should contain at least {key: , value:, foo:""}
 			
 			$scope.stats = function() {
@@ -200,8 +200,114 @@ var cacControllers = angular.module('cacControllers', []);
 			}
 
 			$scope.continueGame = function(i) {
-				// TODO: redirect to game page
+				$location.path('/game/' + i.obj.id);
 			}
+		}]);
+
+	cacControllers.controller('GameCtrl', ['Game', '$window', '$scope', '$routeParams', 
+		function(Game, $window, $scope, $routeParams) {
+			$scope.gameId = $routeParams.gameId;
+
+			var canvas_elem = $window.document.getElementById("board");
+			var field_height = canvas_elem.height / 3;
+			var field_width = canvas_elem.width / 3;
+			canvas_elem.onmousedown = onMouseClick;
+			var ctx = canvas_elem.getContext("2d");
+			drawBoard();
+
+			Game.get($scope.gameId).then(function(resp) {
+				$scope.player_a = resp.player_a;
+				$scope.player_b = resp.player_b;
+				console.log(resp);
+			}, function(resp) {
+				console.log(resp);
+			});
+
+			var board = [[null, null, null], [null, null, null], [null, null, null]];
+			Game.moves($scope.gameId).then(function(resp) {
+				resp.forEach(function(move) {
+					if (move.player == $scope.storage.loggedUsername) {
+						drawCircle($window.Math.floor(move.position / 3), move.position % 3);
+					} else {
+						drawCross($window.Math.floor(move.position / 3), move.position % 3);
+					}
+				});
+				console.log(resp);
+			}, function(resp) {
+				console.log(resp);
+			})
+
+			function drawBoard() {
+				var offset = 5;
+				
+				ctx.lineCap = "round";
+				ctx.strokeStyle = "black";
+				ctx.lineWidth = 3;
+				ctx.beginPath();
+
+
+				ctx.moveTo(field_width, offset);
+				ctx.lineTo(field_width, canvas_elem.height - offset);
+
+				ctx.moveTo(2*field_width, offset);
+				ctx.lineTo(2*field_width, canvas_elem.height - offset);
+				
+				ctx.moveTo(offset, field_height);
+				ctx.lineTo(canvas_elem.width - offset, field_height);
+
+				ctx.moveTo(offset, 2*field_height);
+				ctx.lineTo(canvas_elem.width - offset, 2*field_height);
+
+				ctx.stroke();
+				ctx.closePath();
+			}
+
+			function drawCross(row, col) {
+				var offset = 0.2;
+				var left = col * field_width + offset * field_width;
+				var right = (col + 1) * field_width - offset * field_width;
+				var top = row * field_height + offset * field_height;
+				var bottom = (row + 1) * field_height  - offset * field_height;
+
+				ctx.strokeStyle = "red";
+				ctx.lineCap = "round";
+				ctx.lineWidth = 10;
+
+				ctx.beginPath();
+				ctx.moveTo(left, top);
+				ctx.lineTo(right, bottom);
+
+				ctx.moveTo(right, top);
+				ctx.lineTo(left, bottom);
+
+				ctx.stroke();
+				ctx.closePath();
+			}
+
+			function drawCircle(row, col) {
+				var offset = 0.2;
+				var x = col * field_width + 0.5 * field_width;
+				var y = row * field_height + 0.5 * field_height;
+				var rx = (field_width / 2) - (offset * field_width);
+				var ry = (field_height / 2) - (offset * field_height);
+
+				ctx.strokeStyle = "green";
+				ctx.lineWidth = 10;
+
+				ctx.beginPath();
+
+				ctx.arc(x, y, rx, 0, Math.PI * 2, false);
+
+				ctx.stroke();
+				ctx.closePath();
+			}
+
+			function onMouseClick(e) {
+				var row = Math.floor((e.pageY - canvas_elem.offsetTop) / field_height);
+				var column = Math.floor((e.pageX - canvas_elem.offsetLeft) / field_width);
+			 	drawCircle(row, column);
+			}
+
 		}]);
 
 

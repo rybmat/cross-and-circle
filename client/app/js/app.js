@@ -24,6 +24,10 @@ crossAndCircle.config(['$routeProvider', 'RestangularProvider',
         templateUrl: 'partials/menu.html',
         controller: 'MenuCtrl'
       }).
+      when('/game/:gameId', {
+        templateUrl: 'partials/game.html',
+        controller: 'GameCtrl'
+      }).
       otherwise({
         redirectTo: '/register'
       });

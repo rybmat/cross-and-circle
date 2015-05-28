@@ -85,4 +85,26 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 
 			return methods;
 		}]);
+
+	cacServices.factory('Game', ['$localStorage', 'Restangular', 
+		function ($localStorage, Restangular) {
+			var resource = Restangular.one('games/');
+			var h = {'Authorization': 'Token ' + $localStorage.loggedUserToken};
+
+			var methods = {
+				get: function(id) {
+					return Restangular.one('games/' + id + '/').get();
+				},
+
+				moves: function(id) {
+					return Restangular.one('games/' + id + '/moves/').get();
+				},
+
+				makeMove: function(gameId, position) {
+
+				}
+			}
+
+			return methods;
+		}]);
 	
