@@ -50,12 +50,16 @@ class PlayerGames(ListAPIView):
 	def get_queryset(self):
 		username = self.kwargs.get(self.lookup_url_kwarg)
 		player = get_object_or_404(User, username=username)
+		params = {}
+		in_progress = self.request.query_params.get('in_progress', None)
+		if in_progress:
+			params['finished'] = None
 
 		if 'opponent' in self.request.query_params:
 			opponent = get_object_or_404(User, username=self.request.query_params['opponent'])
-			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player), Q(player_a=opponent) | Q(player_b=opponent))
+			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player), Q(player_a=opponent) | Q(player_b=opponent), **params)
 		else:
-			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player))
+			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player), **params)
 		return games
 
 
@@ -189,7 +193,7 @@ win_sequences = (
 	(0,3,6,), (1,4,7,), (2,5,8,),
 	(0,4,8,), (2,4,6,),
 )
-def check_winner(game_id):
+def check_winner(game_id): # TODO: maintain draw
 	moves = Move.objects.all().filter(game_id=game_id)
 	board = [None for i in range(9)]
 	for m in moves:
@@ -198,6 +202,9 @@ def check_winner(game_id):
 	for s in win_sequences:
 		if board[s[0]] is not None and board[s[0]] == board[s[1]] and board[s[0]] == board[s[2]]:
 			return board[s[0]]
+
+	if len(moves) == 9:
+		return "No Winner"
 	return None
 
 

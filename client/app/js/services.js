@@ -79,7 +79,7 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 						user, {token: poe});
 				},
 				games: function(uname, p) {
-					return Restangular.one('players/' + uname+ '/games/').get({page: p});
+					return Restangular.one('players/' + uname+ '/games/?in_progress=true').get({page: p});
 				}
 			}
 
@@ -101,7 +101,7 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 				},
 
 				makeMove: function(gameId, position) {
-
+					return Restangular.all('games/' + gameId + '/moves/').post({"position": position}, {}, h);
 				}
 			}
 

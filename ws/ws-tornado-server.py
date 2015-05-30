@@ -17,9 +17,17 @@ class Handler(tornado.websocket.WebSocketHandler):
         del sockets[msg['username']]
         print "bye", sockets
 
+    def route(self, msg):
+        handler = sockets.get(msg['to'], None)
+        if handler:
+            handler.write_message(msg)
+
+
     msg_types = {
         'hello': on_hello,
         'bye': on_bye,
+        'move': route,
+        'req-acc': route,
     }
 
     def open(self):
@@ -38,15 +46,10 @@ class Handler(tornado.websocket.WebSocketHandler):
         print "close"
 
     def on_message(self, message):
-        print "message"
+        print "message", message
         m = json.loads(message)
         self.msg_types[m['type']](self, m)
 
-        # if m['type'] == 'hello':
-        #     sockets[m['id']] = self
-        #     print sockets
-        # else:
-        #     sockets[m['id']].write_message(message)
 
     def check_origin(self, origin):
         return True
