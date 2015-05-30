@@ -84,8 +84,8 @@ var cacControllers = angular.module('cacControllers', []);
 			}
 		}]);
 
-	cacControllers.controller('MenuCtrl', ['$location', 'Players', 'PoeToken', 'GameRequests', '$scope', 
-		function($location, Players, PoeToken, GameRequests, $scope) {
+	cacControllers.controller('MenuCtrl', ['WebSock', '$location', 'Players', 'PoeToken', 'GameRequests', '$scope', 
+		function(WebSock, $location, Players, PoeToken, GameRequests, $scope) {
 			$scope.items = [];	// should contain at least {key: , value:, foo:""}
 			
 			$scope.stats = function() {
@@ -125,6 +125,7 @@ var cacControllers = angular.module('cacControllers', []);
 					GameRequests.send($scope.opponent, $scope.poeToken).then(
 						function(resp) {
 							$scope.errors = ['Request sent! Please wait for accepting the request.'];
+							WebSock.send({type: 'new-req', from: $scope.storage.loggedUsername, to: $scope.opponent})
 						}, function(resp) {
 							$scope.errors = ['Error has occured, please contact with support.'];
 							console.log(resp);
@@ -170,6 +171,7 @@ var cacControllers = angular.module('cacControllers', []);
 
 			$scope.acceptRequest = function(i) {
 				GameRequests.accept(i.obj.id).then(function(resp) {
+					WebSock.send({type: 'req-acc', from: i.obj.requested, to: i.obj.requesting});
 					$location.path('/game/' + i.obj.id);
 				}, function(resp) {
 					console.log(resp);
@@ -325,10 +327,8 @@ var cacControllers = angular.module('cacControllers', []);
 			 			console.log(resp);
 			 			board[row][column] = $scope.storage.loggedUsername;
 			 			drawCircle(row, column);
-
+						WebSock.send({type: "move", from: $scope.storage.loggedUsername, to: $scope.opponent, position: resp.position});
 			 			checkWinner(resp);
-
-						WebSock.send({type: "move", from: $scope.storage.loggedUsername, to: $scope.opponent});		
 			 		}, function(resp) {
 			 			$window.alert("Your opponent is taking his turn. Please wait.")
 			 			console.log(resp);

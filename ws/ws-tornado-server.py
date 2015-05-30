@@ -28,6 +28,7 @@ class Handler(tornado.websocket.WebSocketHandler):
         'bye': on_bye,
         'move': route,
         'req-acc': route,
+        'new-req': route,
     }
 
     def open(self):

@@ -1,3 +1,7 @@
+<div ng-show="storage.loggedIn" class="right">
+      <span>{{storage.loggedUsername}}</span>
+      <button type="button" class="btn btn-default" ng-click="logout()">Log out</button>
+</div>
 
 <div class="page-header">
   <h1>{{player_a}} vs. {{player_b}}</h1>
