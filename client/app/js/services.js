@@ -7,13 +7,12 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 		function($websocket) {
 			var dataStream = $websocket('ws://localhost:8880/ws');
 
-			dataStream.onMessage(function(message) {
-		        console.log(message);
-	      	});
-
 			var methods = {
 		      	send: function(data) {
 		      		dataStream.send(JSON.stringify(data));
+		      	},
+		      	onMessage: function(foo) {
+		      		return dataStream.onMessage(foo);
 		      	}
 		    };
 		    return methods;

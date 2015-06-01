@@ -15,9 +15,27 @@ var cacControllers = angular.module('cacControllers', []);
 			    }  
 			});
 
+
 			if ($scope.storage.loggedUsername) {
 				WebSock.send({type: "hello", username: $scope.storage.loggedUsername});	
 			}
+
+			$scope.messages = {
+				'move': [],
+				'req-acc': [],
+				'new-req': []
+			}
+			$scope.msgClear = function(type) {
+				$scope.type = [];
+			}
+
+			WebSock.onMessage(function(msg) {
+				var data = JSON.parse(msg.data);
+				console.log("rcv_msg ", data);
+				if ( $scope.messages[data.type].indexOf(data.from) == -1) {
+					$scope.messages[data.type].push(data.from);
+				}
+			});
 
 			$scope.login = function(username, password) {
 				AuthToken.get(username, password).then(function(resp) {			
@@ -33,8 +51,6 @@ var cacControllers = angular.module('cacControllers', []);
 				  	console.log(resp);
 					$scope.loginErrors = resp.data;
 				});
-
-				//TODO: listen for messages and do sth
 			}
 
 			$scope.logout = function() {
@@ -172,7 +188,7 @@ var cacControllers = angular.module('cacControllers', []);
 			$scope.acceptRequest = function(i) {
 				GameRequests.accept(i.obj.id).then(function(resp) {
 					WebSock.send({type: 'req-acc', from: i.obj.requested, to: i.obj.requesting});
-					$location.path('/game/' + i.obj.id);
+					$location.path('/game/' + resp.id);
 				}, function(resp) {
 					console.log(resp);
 				});
@@ -235,10 +251,38 @@ var cacControllers = angular.module('cacControllers', []);
 			Game.get($scope.gameId).then(function(resp) {
 				$scope.player_a = resp.player_a;
 				$scope.player_b = resp.player_b;
-				checkWinner(resp);
+				if ($scope.storage.loggedUsername != resp.player_a) {
+					$scope.opponent = resp.player_a;
+				} else {
+					$scope.opponent = resp.player_b;
+				}
+				checkWinner(resp.winner);
 				console.log(resp);
 			}, function(resp) {
 				console.log(resp);
+			});
+
+			function checkWinner(winner) {
+				if (winner != null) {
+	 				if (winner == "No Winner") {
+	 					$window.alert("This game does not have winner.");
+	 				} else {
+	 					if (winner == $scope.storage.loggedUsername) {
+	 						$window.alert("Congratulation! You won this game!");
+	 					} else {
+	 						$window.alert("Maybe next time will be better.");
+	 					}
+	 				}
+					$location.path('/menu');
+	 			}
+			}
+
+			WebSock.onMessage(function(msg) {
+				var data = JSON.parse(msg.data);
+				if (data.from == $scope.opponent) {
+					drawCross(Math.floor(data.position / 3), data.position % 3);
+					checkWinner(msg.winner);
+				}
 			});
 
 			function drawBoard() {
@@ -303,21 +347,6 @@ var cacControllers = angular.module('cacControllers', []);
 				ctx.closePath();
 			}
 
-			function checkWinner(game) {
-				if (game.winner != null) {
-	 				if (game.winner == "No Winner") {
-	 					$window.alert("This game does not have winner.");
-	 				} else {
-	 					if (game.winner == $scope.storage.loggedUsername) {
-	 						$window.alert("Congratulation! You won this game!");
-	 					} else {
-	 						$window.alert("Maybe next time will be better.");
-	 					}
-	 				}
-					$location.path('/menu');
-	 			}
-			}
-
 			function makeMove(e) {
 				var row = Math.floor((e.pageY - canvas_elem.offsetTop) / field_height);
 				var column = Math.floor((e.pageX - canvas_elem.offsetLeft) / field_width);
@@ -327,8 +356,8 @@ var cacControllers = angular.module('cacControllers', []);
 			 			console.log(resp);
 			 			board[row][column] = $scope.storage.loggedUsername;
 			 			drawCircle(row, column);
-						WebSock.send({type: "move", from: $scope.storage.loggedUsername, to: $scope.opponent, position: resp.position});
-			 			checkWinner(resp);
+						WebSock.send({type: "move", from: $scope.storage.loggedUsername, to: $scope.opponent, position: resp.move.position, winner: resp.winner});
+			 			checkWinner(resp.winner);
 			 		}, function(resp) {
 			 			$window.alert("Your opponent is taking his turn. Please wait.")
 			 			console.log(resp);

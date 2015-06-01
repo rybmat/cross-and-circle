@@ -193,7 +193,7 @@ win_sequences = (
 	(0,3,6,), (1,4,7,), (2,5,8,),
 	(0,4,8,), (2,4,6,),
 )
-def check_winner(game_id): # TODO: maintain draw
+def check_winner(game_id):
 	moves = Move.objects.all().filter(game_id=game_id)
 	board = [None for i in range(9)]
 	for m in moves:
@@ -203,7 +203,7 @@ def check_winner(game_id): # TODO: maintain draw
 		if board[s[0]] is not None and board[s[0]] == board[s[1]] and board[s[0]] == board[s[2]]:
 			return board[s[0]]
 
-	if len(moves) == 9:
+	if len(list(moves)) == 9:
 		return "No Winner"
 	return None
 

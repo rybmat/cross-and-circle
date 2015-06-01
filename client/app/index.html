@@ -27,10 +27,21 @@
 </head>
 <body ng-controller="MainCtrl">
   <div class="container">
-
-    <div class="alert alert-success alert-dismissible" role="alert">
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <strong>Warning!</strong> Better check yourself, you're not looking too good.
+    <div ng-show="storage.loggedIn" class="right">
+      <span>{{storage.loggedUsername}}</span>
+      <button type="button" class="btn btn-default" ng-click="logout()">Log out</button>
+    </div>
+    <div class="alert alert-success" role="alert" ng-show="messages['move'].length">
+      <button type="button" class="close" aria-label="Close"><span aria-hidden="true" ng-click="msgClear('move')">&times;</span></button>
+      <strong ng-repeat="m in messages['move']">{{m}} </strong> made  move already.
+    </div>
+    <div class="alert alert-success" role="alert" ng-show="messages['req-acc'].length">
+      <button type="button" class="close" aria-label="Close"><span aria-hidden="true" ng-click="msgClear('req-acc')">&times;</span></button>
+      <strong ng-repeat="m in messages['req-acc']">{{m}} </strong> accepted your request.
+    </div>
+    <div class="alert alert-success" role="alert" ng-show="messages['new-req'].length">
+      <button type="button" class="close" aria-label="Close"><span aria-hidden="true" ng-click="msgClear('new-req')">&times;</span></button>
+      <strong ng-repeat="m in messages['new-req']">{{m}} </strong> send you game request.
     </div>
 
     <div ng-view class="view-frame"></div>
