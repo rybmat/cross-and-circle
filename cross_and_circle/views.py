@@ -155,7 +155,8 @@ class Moves(APIView):
 			winner = check_winner(pk)
 			if winner:
 				game = get_object_or_404(Game, pk=pk)
-				game.winner = User.objects.get(username=winner)
+				if winner != "No Winner":
+					game.winner = User.objects.get(username=winner)
 				game.finished = datetime.now()
 				game.save()
 			return Response({"move": serializer.data, "winner": winner}, status=status.HTTP_201_CREATED)

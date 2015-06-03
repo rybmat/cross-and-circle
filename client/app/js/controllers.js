@@ -15,7 +15,6 @@ var cacControllers = angular.module('cacControllers', []);
 			    }  
 			});
 
-
 			if ($scope.storage.loggedUsername) {
 				WebSock.send({type: "hello", username: $scope.storage.loggedUsername});	
 			}
@@ -26,8 +25,7 @@ var cacControllers = angular.module('cacControllers', []);
 				'new-req': []
 			}
 			$scope.msgClear = function(type) {
-				console.log(type);
-				$scope.type = [];
+				$scope.messages[type] = [];
 			}
 
 			WebSock.onMessage(function(msg) {
@@ -257,32 +255,35 @@ var cacControllers = angular.module('cacControllers', []);
 				} else {
 					$scope.opponent = resp.player_b;
 				}
-				checkWinner(resp.winner);
+				checkWinner(resp.winner, resp.finished);
 				console.log(resp);
 			}, function(resp) {
 				console.log(resp);
 			});
 
-			function checkWinner(winner) {
-				if (winner != null) {
-	 				if (winner == "No Winner") {
-	 					$window.alert("This game does not have winner.");
-	 				} else {
-	 					if (winner == $scope.storage.loggedUsername) {
-	 						$window.alert("Congratulation! You won this game!");
-	 					} else {
-	 						$window.alert("Maybe next time will be better.");
-	 					}
-	 				}
+			function checkWinner(winner, finished) {
+				if (winner == $scope.storage.loggedUsername) {
+					$window.alert("Congratulation! You won this game!");
 					$location.path('/menu');
-	 			}
+					return;
+				}
+				if (winner == $scope.opponent) {
+					$window.alert("Maybe next time will be better.");
+					$location.path('/menu');
+					return
+				}
+	 			if (winner == "No Winner" || finished != null) {
+ 					$window.alert("This game does not have winner.");
+ 					$location.path('/menu');
+ 					return;
+ 				} 
 			}
 
 			WebSock.onMessage(function(msg) {
 				var data = JSON.parse(msg.data);
 				if (data.from == $scope.opponent) {
 					drawCross(Math.floor(data.position / 3), data.position % 3);
-					checkWinner(msg.winner);
+					checkWinner(data.winner, null);
 				}
 			});
 
@@ -358,7 +359,7 @@ var cacControllers = angular.module('cacControllers', []);
 			 			board[row][column] = $scope.storage.loggedUsername;
 			 			drawCircle(row, column);
 						WebSock.send({type: "move", from: $scope.storage.loggedUsername, to: $scope.opponent, position: resp.move.position, winner: resp.winner});
-			 			checkWinner(resp.winner);
+			 			checkWinner(resp.winner, null);
 			 		}, function(resp) {
 			 			$window.alert("Your opponent is taking his turn. Please wait.")
 			 			console.log(resp);
