@@ -26,6 +26,7 @@ var cacControllers = angular.module('cacControllers', []);
 				'new-req': []
 			}
 			$scope.msgClear = function(type) {
+				console.log(type);
 				$scope.type = [];
 			}
 

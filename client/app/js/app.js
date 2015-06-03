@@ -29,7 +29,7 @@ crossAndCircle.config(['$routeProvider', 'RestangularProvider',
         controller: 'GameCtrl'
       }).
       otherwise({
-        redirectTo: '/register'
+        redirectTo: '/menu'
       });
 
       RestangularProvider.setBaseUrl('http://127.0.0.1:8888/rest/');
