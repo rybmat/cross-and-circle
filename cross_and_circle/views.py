@@ -41,7 +41,7 @@ class PlayerDetails(RetrieveUpdateAPIView):
 	lookup_field = 'username'
 
 
-#all
+# all
 class PlayerGames(ListAPIView):
 	permission_classes = (permissions.AllowAny,)
 	serializer_class = GameSerializer
@@ -72,15 +72,16 @@ class PlayerStats(APIView):
 		
 		if 'opponent' in request.query_params:
 			opponent = get_object_or_404(User, username=request.query_params['opponent'])
-			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player), Q(player_a=opponent) | Q(player_b=opponent)).exclude(winner=None)
+			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player), Q(player_a=opponent) | Q(player_b=opponent)).exclude(finished=None)
 		else:
-			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player)).exclude(winner=None)
+			games = Game.objects.all().filter(Q(player_a=player) | Q(player_b=player)).exclude(finished=None)
 
 		all_games = len(games)
 		won_games = len(games.filter(winner=player))
-		lost_games = all_games - won_games
+		draws = len(games.filter(winner=None, finished__isnull=False))
+		lost_games = all_games - won_games - draws
 
-		return Response({"games": all_games, "won": won_games, "lost": lost_games})
+		return Response({"games": all_games, "won": won_games, "lost": lost_games, "draws": draws})
 
 
 # all

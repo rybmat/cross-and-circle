@@ -6,11 +6,16 @@ import json
 
 sockets = {}    # {username: Handler}
 
+pending_msgs = {}
 
 class Handler(tornado.websocket.WebSocketHandler):
 
     def on_hello(self, msg):
         sockets[msg['username']] = self
+        for m in pending_msgs.get(msg['username'], []):
+            self.write_message(m)
+        if pending_msgs.get(msg['username'], False):
+            del pending_msgs[msg['username']]
         print sockets
 
     def on_bye(self, msg):
@@ -21,6 +26,8 @@ class Handler(tornado.websocket.WebSocketHandler):
         handler = sockets.get(msg['to'], None)
         if handler:
             handler.write_message(msg)
+        else:
+            pending_msgs.setdefault(msg['to'], []).append(msg)
 
 
     msg_types = {

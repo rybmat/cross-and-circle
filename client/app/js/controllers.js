@@ -15,10 +15,6 @@ var cacControllers = angular.module('cacControllers', []);
 			    }  
 			});
 
-			if ($scope.storage.loggedUsername) {
-				WebSock.send({type: "hello", username: $scope.storage.loggedUsername});	
-			}
-
 			$scope.messages = {
 				'move': [],
 				'req-acc': [],
@@ -35,6 +31,10 @@ var cacControllers = angular.module('cacControllers', []);
 					$scope.messages[data.type].push(data.from);
 				}
 			});
+
+			if ($scope.storage.loggedUsername) {
+				WebSock.send({type: "hello", username: $scope.storage.loggedUsername});	
+			}
 
 			$scope.login = function(username, password) {
 				AuthToken.get(username, password).then(function(resp) {			
@@ -110,7 +110,8 @@ var cacControllers = angular.module('cacControllers', []);
 				Players.stats($scope.storage.loggedUsername).then(function(resp) {
 					$scope.items = [{key:"Games total", value:resp.games}, 
 						{key:"Won", value:resp.won},
-						{key:"Lost", value:resp.lost}];
+						{key:"Lost", value:resp.lost},
+						{key:"Draws", value:resp.draws}];
 				});
 			}
 			
@@ -177,7 +178,7 @@ var cacControllers = angular.module('cacControllers', []);
 									{key: item.requesting, value: null, foo: $scope.acceptRequest, obj: item}
 								);
 						}, function() {
-							$scope.page -= 1;
+							$scope.page = $scope.page - 1;
 						});
 					});
 				}
@@ -207,7 +208,7 @@ var cacControllers = angular.module('cacControllers', []);
 									{key: item.player_a + ' vs ' + item.player_b, value: null, foo: $scope.continueGame, obj: item}
 								);
 						}, function() {
-							$scope.page -= 1;
+							$scope.page = $scope.page - 1;
 						});
 					});
 				}
