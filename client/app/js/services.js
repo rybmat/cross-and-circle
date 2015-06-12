@@ -26,7 +26,7 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 				send: function(opponent, poeToken) {
 					var payload = {requested: opponent};
 					var h = {'Authorization': 'Token ' + $localStorage.loggedUserToken};
-					return resource.post('', payload, {"token": poeToken}, h);
+					return Restangular.one('request-merger/').post('', payload, {"token": poeToken}, h);
 				},
 				getList: function(pageNum) {
 					return resource.get({page: pageNum, requested: $localStorage.loggedUsername});

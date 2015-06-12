@@ -282,7 +282,7 @@ var cacControllers = angular.module('cacControllers', []);
 
 			WebSock.onMessage(function(msg) {
 				var data = JSON.parse(msg.data);
-				if (data.from == $scope.opponent) {
+				if (data.from == $scope.opponent && data.game == $scope.gameId) {
 					drawCross(Math.floor(data.position / 3), data.position % 3);
 					checkWinner(data.winner, null);
 				}
@@ -359,7 +359,7 @@ var cacControllers = angular.module('cacControllers', []);
 			 			console.log(resp);
 			 			board[row][column] = $scope.storage.loggedUsername;
 			 			drawCircle(row, column);
-						WebSock.send({type: "move", from: $scope.storage.loggedUsername, to: $scope.opponent, position: resp.move.position, winner: resp.winner});
+						WebSock.send({type: "move", from: $scope.storage.loggedUsername, to: $scope.opponent, position: resp.move.position, winner: resp.winner, game: $scope.gameId});
 			 			checkWinner(resp.winner, null);
 			 		}, function(resp) {
 			 			$window.alert("Your opponent is taking his turn. Please wait.")

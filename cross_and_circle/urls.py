@@ -19,6 +19,7 @@ urlpatterns = patterns('',
     url(r'^requests/(?P<pk>[0-9]+)/$', views.RequestDetails.as_view(), name='gamerequest-detail'),
 
     url(r'^accepted-requests/', views.Accepted.as_view(), name='accepted-requests'),
+    url(r'^request-merger/', views.RequestMerger.as_view(), name='request-merger'),
 
     url(r'^api-token-auth/', obtain_auth_token),
 )

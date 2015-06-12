@@ -29,7 +29,7 @@ class Players(ListCreateAPIView):
 	lookup_field = 'username'
 
 	def perform_create(self, serializer):
-		check_poe_tocken(self.request)
+		check_poe_token(self.request)
 		serializer.save()
 
 
@@ -125,7 +125,7 @@ class Requests(ListCreateAPIView):
 		return GameRequest.objects.all().filter(**params)
 
 	def perform_create(self, serializer):
-		check_poe_tocken(self.request)
+		check_poe_token(self.request)
 		serializer.save(requesting=self.request.user)
 
 
@@ -188,6 +188,25 @@ class Accepted(APIView):
 			return Response({"detail": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
 
 
+class RequestMerger(APIView):
+	permission_classes = (permissions.IsAuthenticated,)
+	def post(self, request, format=None):
+		check_poe_token(request)
+		
+		serializer = GameRequestSerializer(data=request.data, context={'request': request})
+		if serializer.is_valid():
+			game_requests = GameRequest.objects.filter(requesting__username=request.user, requested__username=request.data['requested'])
+			game_requests.delete()
+
+			game_requests = GameRequest.objects.filter(requested__username=request.user, requesting__username=request.data['requested'])
+			game_requests.delete()
+
+			serializer.save(requesting=request.user)
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 """0 1 2
    3 4 5
    6 7 8
@@ -212,7 +231,7 @@ def check_winner(game_id):
 	return None
 
 
-def check_poe_tocken(request):
+def check_poe_token(request):
 	if 'token' not in request.query_params:
 		raise MethodNotAllowed("POST", detail="POE token missing")
 
