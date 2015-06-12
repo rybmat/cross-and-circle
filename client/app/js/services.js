@@ -21,18 +21,18 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 	cacServices.factory('GameRequests', ['$localStorage', 'Restangular', 
 		function($localStorage, Restangular) {
 			var resource = Restangular.one('requests/');
-			var h = {'Authorization': 'Token ' + $localStorage.loggedUserToken};
 
 			var methods = {
 				send: function(opponent, poeToken) {
 					var payload = {requested: opponent};
-
+					var h = {'Authorization': 'Token ' + $localStorage.loggedUserToken};
 					return resource.post('', payload, {"token": poeToken}, h);
 				},
 				getList: function(pageNum) {
 					return resource.get({page: pageNum, requested: $localStorage.loggedUsername});
 				},
 				accept: function(reqId) {
+					var h = {'Authorization': 'Token ' + $localStorage.loggedUserToken};
 					return Restangular.all('accepted-requests/').post({"request-id": reqId}, {}, h);
 				}
 			}
@@ -88,7 +88,6 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 	cacServices.factory('Game', ['$localStorage', 'Restangular', 
 		function ($localStorage, Restangular) {
 			var resource = Restangular.one('games/');
-			var h = {'Authorization': 'Token ' + $localStorage.loggedUserToken};
 
 			var methods = {
 				get: function(id) {
@@ -100,6 +99,7 @@ var cacServices = angular.module('cacServices', ['ngWebSocket']);
 				},
 
 				makeMove: function(gameId, position) {
+					var h = {'Authorization': 'Token ' + $localStorage.loggedUserToken};
 					return Restangular.all('games/' + gameId + '/moves/').post({"position": position}, {}, h);
 				}
 			}

@@ -149,6 +149,7 @@ class Moves(APIView):
 	def post(self, request, pk, format=None):
 		request.data['game'] = pk
 		request.data['player'] = request.user
+		print request.user
 		serializer = MoveSerializer(data=request.data)
 		if serializer.is_valid():
 			serializer.save()
@@ -168,6 +169,7 @@ class Moves(APIView):
 class Accepted(APIView):
 	permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 	def post(self, request, format=None):
+		print request.user
 		if not 'request-id' in request.data:
 			print request.data
 			return Response({"detail": "request-id is required"}, status=status.HTTP_400_BAD_REQUEST)
